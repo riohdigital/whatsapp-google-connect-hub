@@ -14,8 +14,8 @@ import {
 } from "@/utils/googleAuth";
 
 // Configurações do ambiente
-const GOOGLE_CLIENT_ID = "414232145280-as5a3ntt18cj35c97gadceaaadstrsja.apps.googleusercontent.com"; // ⚠️ Substitua pelo seu Client ID real
-const SUPABASE_EDGE_FUNCTION_URL = "https://uoeshejtkzngnqxtqtbl.supabase.co/functions/v1/auth-google-exchange"; // ⚠️ Substitua pela URL real
+const GOOGLE_CLIENT_ID = "414232145280-as5a3ntt18cj35c97gadceaaadstrsja.apps.googleusercontent.com"; 
+const SUPABASE_EDGE_FUNCTION_URL = "https://uoeshejtkzngnqxtqtbl.supabase.co/functions/v1/auth-google-exchange"; 
 
 const Conectar = () => {
   const { toast } = useToast();
@@ -23,6 +23,7 @@ const Conectar = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [n8nWebhookUrl, setN8nWebhookUrl] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   
   // Google OAuth Configuration
   const googleScopes = [
@@ -63,6 +64,7 @@ const Conectar = () => {
 
   const handleGoogleAuth = () => {
     setIsLoading(true);
+    setAuthError(null);
     
     // Verificar se a biblioteca do Google foi carregada
     if (!(window as any).google?.accounts?.oauth2) {
@@ -77,10 +79,12 @@ const Conectar = () => {
     
     const handleOAuthResponse = async (response: { code: string }) => {
       try {
-        console.log("Código de autorização recebido, enviando para o backend...");
+        console.log("Código de autorização recebido:", response.code.substring(0, 10) + "...");
         
         // Enviar o código para o backend (Supabase Edge Function)
+        console.log("Enviando código para o backend:", SUPABASE_EDGE_FUNCTION_URL);
         const result = await sendCodeToBackend(response.code, SUPABASE_EDGE_FUNCTION_URL);
+        console.log("Resposta do backend:", result);
         
         setIsAuthorized(true);
         setUserEmail(result.email);
@@ -93,10 +97,12 @@ const Conectar = () => {
           description: `Sua conta Google (${result.email}) foi conectada com sucesso!`,
         });
       } catch (error) {
-        console.error("Erro durante autenticação:", error);
+        console.error("Erro detalhado durante autenticação:", error);
+        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
+        setAuthError(errorMessage);
         toast({
           title: "Falha na autenticação",
-          description: error instanceof Error ? error.message : "Ocorreu um erro desconhecido",
+          description: errorMessage,
           variant: "destructive",
         });
         clearLocalAuthState();
@@ -106,6 +112,7 @@ const Conectar = () => {
     };
     
     try {
+      console.log("Iniciando fluxo de autenticação com Google");
       const client = initGoogleOAuthClient({
         clientId: GOOGLE_CLIENT_ID,
         scopes: googleScopes,
@@ -113,6 +120,7 @@ const Conectar = () => {
       });
       
       // Iniciar o fluxo de autenticação
+      console.log("Solicitando código de autorização");
       client.requestCode();
     } catch (error) {
       console.error("Erro ao iniciar autenticação:", error);
@@ -221,6 +229,18 @@ const Conectar = () => {
                     </div>
                   </div>
                 </div>
+                
+                {authError && (
+                  <div className="mb-6 p-4 border border-red-200 bg-red-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="text-red-500" />
+                      <div>
+                        <p className="font-medium text-red-800">Erro de autenticação</p>
+                        <p className="text-red-700 text-sm">{authError}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {!isAuthorized ? (
                   <Button 

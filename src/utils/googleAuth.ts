@@ -19,12 +19,18 @@ export const initGoogleOAuthClient = ({
     scope: scopes.join(' '),
     callback: callbackFunction,
     ux_mode: 'popup',
+    error_callback: (error: any) => {
+      console.error("Erro na autenticação Google:", error);
+    }
   });
 };
 
 // Send authorization code to backend (Supabase Edge Function)
 export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) => {
   try {
+    console.log(`Enviando código para: ${edgeFunctionUrl}`);
+    console.log(`Tamanho do código: ${code.length} caracteres`);
+    
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
@@ -33,12 +39,23 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
       body: JSON.stringify({ code }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Falha na autenticação');
+    console.log("Status da resposta:", response.status);
+    const responseText = await response.text();
+    console.log("Texto da resposta:", responseText);
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Erro ao parsear resposta JSON:", e);
+      throw new Error(`Resposta inválida do servidor: ${responseText}`);
     }
 
-    return await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || `Falha na autenticação (${response.status}): ${responseText}`);
+    }
+
+    return data;
   } catch (error) {
     console.error('Erro ao enviar código para o backend:', error);
     throw error;

@@ -1,0 +1,5 @@
+
+project_id = "uoeshejtkzngnqxtqtbl"
+
+[functions.auth-google-exchange]
+verify_jwt = false

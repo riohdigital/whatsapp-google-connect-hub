@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth"; // We'll create this hook
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -21,7 +23,7 @@ const Navbar = () => {
             <div className="w-3 h-3 rounded-full bg-brand-yellow"></div>
             <div className="w-3 h-3 rounded-full bg-brand-green"></div>
           </div>
-          <Link to="/" className="font-bold text-xl">WhatsApp Connect</Link>
+          <Link to="/" className="font-bold text-xl">DigiRioh</Link>
         </div>
 
         {/* Desktop Navigation */}
@@ -32,12 +34,23 @@ const Navbar = () => {
           <Link to="/como-funciona" className="text-gray-700 hover:text-gray-900 font-medium">
             Como Funciona
           </Link>
-          <Link to="/dashboard" className="text-gray-700 hover:text-gray-900 font-medium">
-            Dashboard
-          </Link>
-          <Button variant="default" asChild>
-            <Link to="/conectar">Conectar Conta</Link>
-          </Button>
+          {user ? (
+            <>
+              <Link to="/dashboard" className="text-gray-700 hover:text-gray-900 font-medium">
+                Dashboard
+              </Link>
+              <Link to="/planos" className="text-gray-700 hover:text-gray-900 font-medium">
+                Planos
+              </Link>
+              <Button variant="outline" onClick={signOut}>
+                Sair
+              </Button>
+            </>
+          ) : (
+            <Button variant="default" asChild>
+              <Link to="/auth">Entrar</Link>
+            </Button>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -66,16 +79,31 @@ const Navbar = () => {
             >
               Como Funciona
             </Link>
-            <Link 
-              to="/dashboard" 
-              className="text-gray-700 hover:text-gray-900 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Dashboard
-            </Link>
-            <Button variant="default" asChild onClick={() => setIsMenuOpen(false)}>
-              <Link to="/conectar">Conectar Conta</Link>
-            </Button>
+            {user ? (
+              <>
+                <Link 
+                  to="/dashboard" 
+                  className="text-gray-700 hover:text-gray-900 font-medium py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  to="/planos" 
+                  className="text-gray-700 hover:text-gray-900 font-medium py-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Planos
+                </Link>
+                <Button variant="outline" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <Button variant="default" asChild onClick={() => setIsMenuOpen(false)}>
+                <Link to="/auth">Entrar</Link>
+              </Button>
+            )}
           </div>
         </div>
       )}

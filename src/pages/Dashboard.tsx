@@ -5,14 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Mail, Calendar, RefreshCw, Settings, AlertCircle, CheckCircle, 
-  XCircle, Info, ArrowRight, ExternalLink 
+  XCircle, Info, ArrowRight, ExternalLink, Users, ShieldCheck
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  
+  const isAdmin = user?.role === 'admin';
+  const userPlan = "Pro"; // Placeholder - should come from user data
   
   const handleRefreshToken = () => {
     setIsLoading(true);
@@ -67,6 +72,22 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
+                  {/* Plano atual do usuário */}
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                    <Info className="text-blue-600" />
+                    <div>
+                      <p className="font-medium text-blue-800">Plano: {userPlan}</p>
+                      <p className="text-blue-700 text-sm">Válido até: 06/05/2025</p>
+                      <Button 
+                        variant="link" 
+                        className="text-blue-700 p-0 h-auto text-sm"
+                        asChild
+                      >
+                        <a href="/planos">Alterar plano</a>
+                      </Button>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-500">Gmail</span>
@@ -83,7 +104,7 @@ const Dashboard = () => {
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">Webhook n8n</span>
+                      <span className="text-sm text-gray-500">Webhook</span>
                       <span className="text-sm font-medium text-green-600 flex items-center gap-1">
                         <CheckCircle size={14} /> Configurado
                       </span>
@@ -148,6 +169,9 @@ const Dashboard = () => {
                   <TabsTrigger value="overview">Visão Geral</TabsTrigger>
                   <TabsTrigger value="permissions">Permissões</TabsTrigger>
                   <TabsTrigger value="logs">Logs</TabsTrigger>
+                  {isAdmin && (
+                    <TabsTrigger value="admin">Admin</TabsTrigger>
+                  )}
                 </TabsList>
                 
                 <TabsContent value="overview">
@@ -163,7 +187,7 @@ const Dashboard = () => {
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                               <p className="text-sm text-gray-500">Email</p>
-                              <p>usuario@gmail.com</p>
+                              <p>{user?.email || "usuario@gmail.com"}</p>
                             </div>
                             <div className="space-y-1">
                               <p className="text-sm text-gray-500">Status da Autorização</p>
@@ -238,7 +262,7 @@ const Dashboard = () => {
                   
                   <Card className="border border-gray-200 shadow-sm">
                     <CardHeader>
-                      <CardTitle>Uso do Assistente</CardTitle>
+                      <CardTitle>DigiRioh no WhatsApp</CardTitle>
                     </CardHeader>
                     
                     <CardContent>
@@ -253,7 +277,7 @@ const Dashboard = () => {
                         
                         <div className="flex flex-col sm:flex-row justify-center gap-3">
                           <Button asChild>
-                            <a href="#" className="flex items-center gap-2">
+                            <a href="https://wa.me/seu-numero-digirioh" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                               Iniciar chat no WhatsApp <ArrowRight size={16} />
                             </a>
                           </Button>
@@ -372,7 +396,7 @@ const Dashboard = () => {
                             <span className="text-sm text-gray-500">05/04/2025 14:32</span>
                           </div>
                           <p className="text-gray-600 text-sm ml-7">
-                            Webhook do n8n configurado e testado com sucesso
+                            Webhook configurado e testado com sucesso
                           </p>
                         </div>
                         
@@ -409,6 +433,86 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 </TabsContent>
+                
+                {/* Admin Tab - Visible only to admin users */}
+                {isAdmin && (
+                  <TabsContent value="admin">
+                    <Card className="border border-gray-200 shadow-sm mb-6">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <ShieldCheck className="text-brand-blue" size={20} />
+                          Painel de Administração
+                        </CardTitle>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="space-y-6">
+                          <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <h3 className="font-medium text-lg mb-3 flex items-center gap-2">
+                              <Users size={18} /> Gerenciamento de Usuários
+                            </h3>
+                            <p className="text-gray-600 mb-4">
+                              Total de usuários ativos: <span className="font-medium">247</span>
+                            </p>
+                            
+                            <div className="grid grid-cols-3 gap-4 mb-4">
+                              <div className="p-3 bg-green-50 border border-green-100 rounded-lg">
+                                <p className="text-sm text-gray-600">Plano Básico</p>
+                                <p className="text-2xl font-bold text-green-700">168</p>
+                              </div>
+                              <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                                <p className="text-sm text-gray-600">Plano Pro</p>
+                                <p className="text-2xl font-bold text-blue-700">64</p>
+                              </div>
+                              <div className="p-3 bg-purple-50 border border-purple-100 rounded-lg">
+                                <p className="text-sm text-gray-600">Plano Enterprise</p>
+                                <p className="text-2xl font-bold text-purple-700">15</p>
+                              </div>
+                            </div>
+                            
+                            <Button variant="outline" size="sm">
+                              Ver todos os usuários
+                            </Button>
+                          </div>
+                          
+                          <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <h3 className="font-medium text-lg mb-3 flex items-center gap-2">
+                              <Settings size={18} /> Configurações do Sistema
+                            </h3>
+                            
+                            <div className="space-y-4">
+                              <div className="flex justify-between items-center p-3 border border-gray-200 bg-white rounded-lg">
+                                <div>
+                                  <p className="font-medium">Manutenção Programada</p>
+                                  <p className="text-sm text-gray-600">Domingo, 10/04/2025, 2:00 - 4:00</p>
+                                </div>
+                                <Button variant="outline" size="sm">Editar</Button>
+                              </div>
+                              
+                              <div className="flex justify-between items-center p-3 border border-gray-200 bg-white rounded-lg">
+                                <div>
+                                  <p className="font-medium">Status do Webhook</p>
+                                  <p className="text-sm text-green-600 flex items-center gap-1">
+                                    <CheckCircle size={14} /> Operacional
+                                  </p>
+                                </div>
+                                <Button variant="outline" size="sm">Verificar</Button>
+                              </div>
+                              
+                              <div className="flex justify-between items-center p-3 border border-gray-200 bg-white rounded-lg">
+                                <div>
+                                  <p className="font-medium">Permissões de Acesso</p>
+                                  <p className="text-sm text-gray-600">3 perfis de acesso configurados</p>
+                                </div>
+                                <Button variant="outline" size="sm">Gerenciar</Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                )}
               </Tabs>
             </div>
           </div>

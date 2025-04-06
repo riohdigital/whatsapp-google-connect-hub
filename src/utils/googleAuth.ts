@@ -44,3 +44,31 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
     throw error;
   }
 };
+
+// Esta função verifica se o token está armazenado localmente (útil para persistir o estado de login)
+export const checkLocalAuthState = () => {
+  const authState = localStorage.getItem('googleAuthState');
+  if (authState) {
+    try {
+      return JSON.parse(authState);
+    } catch (e) {
+      console.error('Erro ao parsear estado de autenticação:', e);
+      localStorage.removeItem('googleAuthState');
+    }
+  }
+  return null;
+};
+
+// Esta função salva o estado de autenticação localmente
+export const saveLocalAuthState = (email: string) => {
+  localStorage.setItem('googleAuthState', JSON.stringify({
+    email,
+    authenticated: true,
+    timestamp: new Date().toISOString()
+  }));
+};
+
+// Esta função limpa o estado de autenticação local
+export const clearLocalAuthState = () => {
+  localStorage.removeItem('googleAuthState');
+};

@@ -5,7 +5,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Calendar, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { initGoogleOAuthClient, sendCodeToBackend } from "@/utils/googleAuth";
+import { 
+  initGoogleOAuthClient, 
+  sendCodeToBackend,
+  checkLocalAuthState,
+  saveLocalAuthState,
+  clearLocalAuthState
+} from "@/utils/googleAuth";
+
+// Configurações do ambiente
+const GOOGLE_CLIENT_ID = "SEU_GOOGLE_CLIENT_ID"; // ⚠️ Substitua pelo seu Client ID real
+const SUPABASE_EDGE_FUNCTION_URL = "https://SEU_PROJETO.supabase.co/functions/v1/auth-google-exchange"; // ⚠️ Substitua pela URL real
 
 const Conectar = () => {
   const { toast } = useToast();
@@ -15,23 +25,36 @@ const Conectar = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   
   // Google OAuth Configuration
-  const googleClientId = "YOUR_GOOGLE_CLIENT_ID"; // Deve ser substituído pelo ID real
   const googleScopes = [
     "email", 
     "profile", 
     "https://mail.google.com/", 
     "https://www.googleapis.com/auth/calendar.events"
   ];
-  const edgeFunctionUrl = "YOUR_SUPABASE_EDGE_FUNCTION_URL"; // URL da Edge Function no Supabase
+  
+  // Verificar estado de autenticação ao carregar
+  useEffect(() => {
+    const authState = checkLocalAuthState();
+    if (authState?.authenticated) {
+      setIsAuthorized(true);
+      setUserEmail(authState.email);
+    }
+  }, []);
   
   // Carregar o script do Google Identity Services
   useEffect(() => {
     const loadGoogleScript = () => {
+      if (document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
+        console.log("Script do Google já carregado");
+        return;
+      }
+
       const script = document.createElement("script");
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
-      script.onload = () => console.log("Google Identity Services carregado");
+      script.onload = () => console.log("Google Identity Services carregado com sucesso");
+      script.onerror = (e) => console.error("Erro ao carregar Google Identity Services:", e);
       document.body.appendChild(script);
     };
 
@@ -44,8 +67,8 @@ const Conectar = () => {
     // Verificar se a biblioteca do Google foi carregada
     if (!(window as any).google?.accounts?.oauth2) {
       toast({
-        title: "Erro ao carregar Google OAuth",
-        description: "Por favor, recarregue a página e tente novamente.",
+        title: "Erro de carregamento",
+        description: "Biblioteca do Google não carregada. Recarregue a página e tente novamente.",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -54,11 +77,16 @@ const Conectar = () => {
     
     const handleOAuthResponse = async (response: { code: string }) => {
       try {
+        console.log("Código de autorização recebido, enviando para o backend...");
+        
         // Enviar o código para o backend (Supabase Edge Function)
-        const result = await sendCodeToBackend(response.code, edgeFunctionUrl);
+        const result = await sendCodeToBackend(response.code, SUPABASE_EDGE_FUNCTION_URL);
         
         setIsAuthorized(true);
-        setUserEmail(result.email || "seu-email@gmail.com");
+        setUserEmail(result.email);
+        
+        // Salvar estado de autenticação
+        saveLocalAuthState(result.email);
         
         toast({
           title: "Autenticação realizada",
@@ -71,6 +99,7 @@ const Conectar = () => {
           description: error instanceof Error ? error.message : "Ocorreu um erro desconhecido",
           variant: "destructive",
         });
+        clearLocalAuthState();
       } finally {
         setIsLoading(false);
       }
@@ -78,7 +107,7 @@ const Conectar = () => {
     
     try {
       const client = initGoogleOAuthClient({
-        clientId: googleClientId,
+        clientId: GOOGLE_CLIENT_ID,
         scopes: googleScopes,
         callbackFunction: handleOAuthResponse,
       });
@@ -97,6 +126,16 @@ const Conectar = () => {
     }
   };
   
+  const handleLogout = () => {
+    setIsAuthorized(false);
+    setUserEmail(null);
+    clearLocalAuthState();
+    toast({
+      title: "Desconectado",
+      description: "Sua conta Google foi desconectada com sucesso.",
+    });
+  };
+  
   const handleConfigureWebhook = () => {
     if (!n8nWebhookUrl) {
       toast({
@@ -110,7 +149,6 @@ const Conectar = () => {
     setIsLoading(true);
     
     // Enviar credenciais para o webhook do n8n
-    // Em produção, isso seria feito de forma segura através do backend
     fetch(n8nWebhookUrl, {
       method: "POST",
       headers: {
@@ -119,7 +157,6 @@ const Conectar = () => {
       body: JSON.stringify({
         email: userEmail,
         status: "connected",
-        // Não incluímos tokens aqui - em produção eles seriam enviados pelo backend
       }),
     })
       .then(response => {
@@ -171,15 +208,15 @@ const Conectar = () => {
                   
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
-                      <CheckCircle2 className="text-brand-green" />
+                      <CheckCircle2 className="text-green-500" />
                       <span className="text-gray-700">Acesso ao Gmail para leitura de emails</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <CheckCircle2 className="text-brand-green" />
+                      <CheckCircle2 className="text-green-500" />
                       <span className="text-gray-700">Acesso ao Google Calendar para gerenciamento de eventos</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <CheckCircle2 className="text-brand-green" />
+                      <CheckCircle2 className="text-green-500" />
                       <span className="text-gray-700">Você pode revogar o acesso a qualquer momento</span>
                     </div>
                   </div>
@@ -193,10 +230,10 @@ const Conectar = () => {
                     size="lg"
                   >
                     <div className="flex space-x-1">
-                      <div className="w-4 h-4 rounded-full bg-brand-blue"></div>
-                      <div className="w-4 h-4 rounded-full bg-brand-red"></div>
-                      <div className="w-4 h-4 rounded-full bg-brand-yellow"></div>
-                      <div className="w-4 h-4 rounded-full bg-brand-green"></div>
+                      <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                      <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                      <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                      <div className="w-4 h-4 rounded-full bg-green-500"></div>
                     </div>
                     <span>
                       {isLoading ? (
@@ -256,7 +293,15 @@ const Conectar = () => {
                         )}
                       </Button>
                       
-                      <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+                      <Button
+                        onClick={handleLogout}
+                        variant="outline"
+                        className="w-full mt-4"
+                      >
+                        Desconectar conta Google
+                      </Button>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm mt-4">
                         <AlertCircle className="text-yellow-600 w-5 h-5 shrink-0" />
                         <p className="text-yellow-700">
                           Em um ambiente de produção, este passo seria automatizado e seguro, sem expor a URL do webhook.
@@ -275,7 +320,7 @@ const Conectar = () => {
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex gap-3">
-                      <Mail className="text-brand-blue shrink-0" />
+                      <Mail className="text-blue-500 shrink-0" />
                       <div>
                         <p className="font-medium">Acessar seus emails</p>
                         <p className="text-sm text-gray-500">Ler e notificar sobre emails importantes</p>
@@ -283,7 +328,7 @@ const Conectar = () => {
                     </div>
                     
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex gap-3">
-                      <Calendar className="text-brand-green shrink-0" />
+                      <Calendar className="text-green-500 shrink-0" />
                       <div>
                         <p className="font-medium">Gerenciar eventos</p>
                         <p className="text-sm text-gray-500">Criar e lembrá-lo de compromissos</p>

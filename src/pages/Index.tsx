@@ -1,4 +1,3 @@
-
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { 
@@ -8,187 +7,91 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Clock } from "@/components/ui/clock-icon";
-import { RobotAssistant } from "@/components/ui/robot-assistant";
-import { FunctionIcon } from "@/components/ui/function-icon";
-import { RobotTentacle } from "@/components/ui/robot-tentacle";
 
 const Index = () => {
   return (
     <Layout>
-      {/* Intro Section - Com Robô Central */}
-      <section className="bg-gradient-to-b from-brand-blue/10 to-white py-12 md:py-20 overflow-hidden">
+      {/* Intro Section - Novo e Mais Divertido */}
+      <section className="bg-gradient-to-b from-brand-blue/10 to-white py-12 md:py-16">
         <div className="container mx-auto px-6 md:px-12 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in">
-            Olá! Eu sou o <span className="text-brand-blue">DigiRioh</span>! 👋
-          </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-10 animate-fade-in">
-            Seu assistente digital brasileiro que vai facilitar seu dia a dia direto no seu WhatsApp!
-          </p>
-          
-          {/* Área do robô central com ícones de função */}
-          <div className="relative h-[500px] mb-12 mx-auto">
-            {/* Robô central flutuando */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <RobotAssistant size="lg" tentacleCount={8} className="animate-bounce-slow" />
-            </div>
-            
-            {/* Círculos de resplandor atrás do robô */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-brand-blue/5 rounded-full animate-pulse-slow"></div>
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-brand-blue/3 rounded-full animate-pulse-slow" style={{ animationDelay: "0.5s" }}></div>
-            
-            {/* Grade de ícones de funções ao redor do robô */}
-            <div className="absolute inset-0">
-              {/* Top */}
-              <FunctionIcon 
-                icon={BrainCircuit} 
-                iconColor="text-brand-blue" 
-                label="Sua Agenda"
-                connectionPosition="bottom"
-                className="absolute left-1/2 -translate-x-1/2 top-8"
-              />
-              
-              {/* Top Right */}
-              <FunctionIcon 
-                icon={Sparkles} 
-                iconColor="text-brand-red" 
-                label="Seus Emails"
-                connectionPosition="left"
-                className="absolute right-[15%] top-[15%]"
-              />
-              
-              {/* Right */}
-              <FunctionIcon 
-                icon={Bot} 
-                iconColor="text-brand-yellow" 
-                label="Seus Contatos"
-                connectionPosition="left"
-                className="absolute right-[8%] top-1/2 -translate-y-1/2"
-              />
-              
-              {/* Bottom Right */}
-              <FunctionIcon 
-                icon={Rocket} 
-                iconColor="text-brand-green" 
-                label="Criação de Textos"
-                connectionPosition="left"
-                className="absolute right-[15%] bottom-[15%]"
-              />
-              
-              {/* Bottom */}
-              <FunctionIcon 
-                icon={Calculator} 
-                iconColor="text-purple-500" 
-                label="Suas Finanças"
-                sublabel="Em breve"
-                connectionPosition="top"
-                className="absolute left-1/2 -translate-x-1/2 bottom-8"
-              />
-              
-              {/* Bottom Left */}
-              <FunctionIcon 
-                icon={CircuitBoard} 
-                iconColor="text-blue-500" 
-                label="Mestre do Tempo"
-                connectionPosition="right"
-                className="absolute left-[15%] bottom-[15%]"
-              />
-              
-              {/* Left */}
-              <FunctionIcon 
-                icon={Laptop} 
-                iconColor="text-cyan-500" 
-                label="Buscas na Web"
-                connectionPosition="right"
-                className="absolute left-[8%] top-1/2 -translate-y-1/2"
-              />
-              
-              {/* Top Left */}
-              <FunctionIcon 
-                icon={Zap} 
-                iconColor="text-amber-500" 
-                label="Cálculos Rápidos"
-                connectionPosition="right"
-                className="absolute left-[15%] top-[15%]"
-              />
-              
-              {/* Linhas diagonais para conexões */}
-              <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                {/* Centro para Top */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="50%" y2="15%" 
-                  stroke="#4285F4" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Centro para Top-Right */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="85%" y2="15%" 
-                  stroke="#EA4335" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Centro para Right */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="92%" y2="50%" 
-                  stroke="#FBBC05" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Centro para Bottom-Right */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="85%" y2="85%" 
-                  stroke="#34A853" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Centro para Bottom */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="50%" y2="85%" 
-                  stroke="#9C27B0" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Centro para Bottom-Left */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="15%" y2="85%" 
-                  stroke="#2196F3" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Centro para Left */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="8%" y2="50%" 
-                  stroke="#00BCD4" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Centro para Top-Left */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="15%" y2="15%" 
-                  stroke="#FF9800" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-              </svg>
+          <div className="flex items-center justify-center mb-6">
+            <div className="relative">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md">
+                <Bot className="w-10 h-10 text-brand-blue" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-brand-red rounded-full flex items-center justify-center text-white font-bold">
+                <Zap className="w-4 h-4" />
+              </div>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in">
+            Olá! Eu sou o <span className="text-brand-blue">DigiRioh</span>! 👋
+          </h1>
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8 animate-fade-in">
+            Seu assistente digital brasileiro que vai facilitar seu dia a dia direto no seu WhatsApp!
+          </p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-10">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-brand-blue/10 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <BrainCircuit className="text-brand-blue w-6 h-6" />
+              </div>
+              <p className="font-medium">Sua Agenda</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-brand-red/10 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <Sparkles className="text-brand-red w-6 h-6" />
+              </div>
+              <p className="font-medium">Seus Emails</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-brand-yellow/10 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <Bot className="text-brand-yellow w-6 h-6" />
+              </div>
+              <p className="font-medium">Seus Contatos</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-brand-green/10 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <Rocket className="text-brand-green w-6 h-6" />
+              </div>
+              <p className="font-medium">Criação de Textos</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <Calculator className="text-purple-500 w-6 h-6" />
+              </div>
+              <p className="font-medium">Suas Finanças</p>
+              <span className="text-xs text-gray-500">Em breve</span>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <CircuitBoard className="text-blue-500 w-6 h-6" />
+              </div>
+              <p className="font-medium">Mestre do Tempo</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-cyan-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <Laptop className="text-cyan-500 w-6 h-6" />
+              </div>
+              <p className="font-medium">Buscas na Web</p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-amber-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <Zap className="text-amber-500 w-6 h-6" />
+              </div>
+              <p className="font-medium">Cálculos Rápidos</p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
               <Link to="/auth" className="flex items-center gap-2">
                 Começar agora <ArrowRight size={18} />
@@ -201,7 +104,7 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Hero Section */}
+      {/* Hero Section - Modificado */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-16 md:py-24">
         <div className="container mx-auto px-6 md:px-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -231,7 +134,9 @@ const Index = () => {
                 
                 <div className="relative bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                   <div className="flex gap-4 items-center mb-6">
-                    <RobotAssistant size="sm" tentacleCount={4} className="flex-shrink-0" />
+                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                      <MessageSquare className="text-white w-6 h-6" />
+                    </div>
                     <div>
                       <h3 className="font-bold">Assistente WhatsApp</h3>
                       <p className="text-sm text-gray-500">Conectado</p>
@@ -273,11 +178,8 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Por que conectar suas contas?</h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 relative overflow-hidden">
-              <div className="absolute -bottom-4 -right-4 opacity-10">
-                <RobotTentacle direction="up" className="w-24 h-24 text-brand-blue" />
-              </div>
-              <div className="w-12 h-12 bg-brand-blue/10 rounded-lg flex items-center justify-center mb-4 relative">
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <div className="w-12 h-12 bg-brand-blue/10 rounded-lg flex items-center justify-center mb-4">
                 <Mail className="text-brand-blue" />
               </div>
               <h3 className="text-xl font-bold mb-2">Acesso aos Emails</h3>
@@ -286,10 +188,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 relative overflow-hidden">
-              <div className="absolute -bottom-4 -right-4 opacity-10">
-                <RobotTentacle direction="left" className="w-24 h-24 text-brand-green" />
-              </div>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
               <div className="w-12 h-12 bg-brand-green/10 rounded-lg flex items-center justify-center mb-4">
                 <Calendar className="text-brand-green" />
               </div>
@@ -299,10 +198,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 relative overflow-hidden">
-              <div className="absolute -bottom-4 -right-4 opacity-10">
-                <RobotTentacle direction="right" className="w-24 h-24 text-brand-yellow" />
-              </div>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
               <div className="w-12 h-12 bg-brand-yellow/10 rounded-lg flex items-center justify-center mb-4">
                 <Lock className="text-brand-yellow" />
               </div>

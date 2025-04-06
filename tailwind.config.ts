@@ -95,42 +95,12 @@ export default {
 				'pulse-slow': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.5' },
-				},
-				'tentacle-wave': {
-					'0%, 100%': { transform: 'rotate(-5deg)' },
-					'50%': { transform: 'rotate(5deg)' },
-				},
-				'tentacle-up': {
-					'0%, 100%': { transform: 'translateY(0) rotate(0)' },
-					'50%': { transform: 'translateY(-4px) rotate(3deg)' },
-				},
-				'tentacle-down': {
-					'0%, 100%': { transform: 'translateY(0) rotate(0)' },
-					'50%': { transform: 'translateY(4px) rotate(-3deg)' },
-				},
-				'tentacle-left': {
-					'0%, 100%': { transform: 'translateX(0) rotate(0)' },
-					'50%': { transform: 'translateX(-4px) rotate(-3deg)' },
-				},
-				'tentacle-right': {
-					'0%, 100%': { transform: 'translateX(0) rotate(0)' },
-					'50%': { transform: 'translateX(4px) rotate(3deg)' },
-				},
-				'bounce-slow': {
-					'0%, 100%': { transform: 'translateY(0)' },
-					'50%': { transform: 'translateY(-10px)' },
-				},
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-slow': 'pulse-slow 3s infinite',
-				'tentacle-wave': 'tentacle-wave 2s ease-in-out infinite',
-				'tentacle-up': 'tentacle-up 2s ease-in-out infinite',
-				'tentacle-down': 'tentacle-down 2s ease-in-out infinite',
-				'tentacle-left': 'tentacle-left 2s ease-in-out infinite',
-				'tentacle-right': 'tentacle-right 2s ease-in-out infinite',
-				'bounce-slow': 'bounce-slow 3s ease-in-out infinite',
+				'pulse-slow': 'pulse-slow 3s infinite'
 			}
 		}
 	},

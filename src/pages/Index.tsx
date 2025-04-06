@@ -1,3 +1,4 @@
+
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { 
@@ -14,88 +15,104 @@ import { RobotTentacle } from "@/components/ui/robot-tentacle";
 const Index = () => {
   return (
     <Layout>
-      {/* Intro Section - Novo e Mais Divertido */}
-      <section className="bg-gradient-to-b from-brand-blue/10 to-white py-12 md:py-16">
+      {/* Intro Section - Com Robô Central */}
+      <section className="bg-gradient-to-b from-brand-blue/10 to-white py-12 md:py-20 overflow-hidden">
         <div className="container mx-auto px-6 md:px-12 text-center">
-          <div className="flex items-center justify-center mb-6">
-            <RobotAssistant size="md" tentacleCount={6} />
-          </div>
-          
           <h1 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in">
             Olá! Eu sou o <span className="text-brand-blue">DigiRioh</span>! 👋
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8 animate-fade-in">
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-10 animate-fade-in">
             Seu assistente digital brasileiro que vai facilitar seu dia a dia direto no seu WhatsApp!
           </p>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-10">
-            <FunctionIcon 
-              icon={BrainCircuit} 
-              iconColor="text-brand-blue" 
-              tentacleColor="text-brand-blue/40"
-              tentacleDirection="up"
-              label="Sua Agenda"
-            />
+          {/* Robô central flutuando */}
+          <div className="relative h-64 mb-12 mx-auto">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <RobotAssistant size="lg" tentacleCount={8} className="animate-bounce-slow" />
+            </div>
             
-            <FunctionIcon 
-              icon={Sparkles} 
-              iconColor="text-brand-red" 
-              tentacleColor="text-brand-red/40"
-              tentacleDirection="right"
-              label="Seus Emails"
-            />
+            {/* Círculo de resplandor atrás do robô */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-brand-blue/5 rounded-full animate-pulse-slow"></div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-brand-blue/3 rounded-full animate-pulse-slow" style={{ animationDelay: "0.5s" }}></div>
             
-            <FunctionIcon 
-              icon={Bot} 
-              iconColor="text-brand-yellow" 
-              tentacleColor="text-brand-yellow/40"
-              tentacleDirection="left"
-              label="Seus Contatos"
-            />
-            
-            <FunctionIcon 
-              icon={Rocket} 
-              iconColor="text-brand-green" 
-              tentacleColor="text-brand-green/40"
-              tentacleDirection="down"
-              label="Criação de Textos"
-            />
-            
-            <FunctionIcon 
-              icon={Calculator} 
-              iconColor="text-purple-500" 
-              tentacleColor="text-purple-500/40"
-              tentacleDirection="up"
-              label="Suas Finanças"
-              sublabel="Em breve"
-            />
-            
-            <FunctionIcon 
-              icon={CircuitBoard} 
-              iconColor="text-blue-500" 
-              tentacleColor="text-blue-500/40"
-              tentacleDirection="right"
-              label="Mestre do Tempo"
-            />
-            
-            <FunctionIcon 
-              icon={Laptop} 
-              iconColor="text-cyan-500" 
-              tentacleColor="text-cyan-500/40"
-              tentacleDirection="left"
-              label="Buscas na Web"
-            />
-            
-            <FunctionIcon 
-              icon={Zap} 
-              iconColor="text-amber-500" 
-              tentacleColor="text-amber-500/40"
-              tentacleDirection="down"
-              label="Cálculos Rápidos"
-            />
+            {/* Grade de ícones de funções em volta do robô */}
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Top */}
+              <FunctionIcon 
+                icon={BrainCircuit} 
+                iconColor="text-brand-blue" 
+                label="Sua Agenda"
+                connectionPosition="bottom"
+                className="absolute left-1/2 -translate-x-1/2 top-0"
+              />
+              
+              {/* Top Right */}
+              <FunctionIcon 
+                icon={Sparkles} 
+                iconColor="text-brand-red" 
+                label="Seus Emails"
+                connectionPosition="left"
+                className="absolute right-8 top-8"
+              />
+              
+              {/* Right */}
+              <FunctionIcon 
+                icon={Bot} 
+                iconColor="text-brand-yellow" 
+                label="Seus Contatos"
+                connectionPosition="left"
+                className="absolute right-0 top-1/2 -translate-y-1/2"
+              />
+              
+              {/* Bottom Right */}
+              <FunctionIcon 
+                icon={Rocket} 
+                iconColor="text-brand-green" 
+                label="Criação de Textos"
+                connectionPosition="top"
+                className="absolute right-8 bottom-8"
+              />
+              
+              {/* Bottom */}
+              <FunctionIcon 
+                icon={Calculator} 
+                iconColor="text-purple-500" 
+                label="Suas Finanças"
+                sublabel="Em breve"
+                connectionPosition="top"
+                className="absolute left-1/2 -translate-x-1/2 bottom-0"
+              />
+              
+              {/* Bottom Left */}
+              <FunctionIcon 
+                icon={CircuitBoard} 
+                iconColor="text-blue-500" 
+                label="Mestre do Tempo"
+                connectionPosition="top"
+                className="absolute left-8 bottom-8"
+              />
+              
+              {/* Left */}
+              <FunctionIcon 
+                icon={Laptop} 
+                iconColor="text-cyan-500" 
+                label="Buscas na Web"
+                connectionPosition="right"
+                className="absolute left-0 top-1/2 -translate-y-1/2"
+              />
+              
+              {/* Top Left */}
+              <FunctionIcon 
+                icon={Zap} 
+                iconColor="text-amber-500" 
+                label="Cálculos Rápidos"
+                connectionPosition="right"
+                className="absolute left-8 top-8"
+              />
+            </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
             <Button size="lg" asChild>
               <Link to="/auth" className="flex items-center gap-2">
                 Começar agora <ArrowRight size={18} />
@@ -108,7 +125,7 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Hero Section - Modificado */}
+      {/* Hero Section */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-16 md:py-24">
         <div className="container mx-auto px-6 md:px-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">

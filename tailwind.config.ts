@@ -116,6 +116,10 @@ export default {
 					'0%, 100%': { transform: 'translateX(0) rotate(0)' },
 					'50%': { transform: 'translateX(4px) rotate(3deg)' },
 				},
+				'bounce-slow': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -126,6 +130,7 @@ export default {
 				'tentacle-down': 'tentacle-down 2s ease-in-out infinite',
 				'tentacle-left': 'tentacle-left 2s ease-in-out infinite',
 				'tentacle-right': 'tentacle-right 2s ease-in-out infinite',
+				'bounce-slow': 'bounce-slow 3s ease-in-out infinite',
 			}
 		}
 	},

@@ -5,22 +5,26 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Planos = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  // Redirect to auth if not logged in
-  if (!user) {
-    // Redirect after a small delay to avoid flickering
-    setTimeout(() => {
-      navigate('/auth');
-    }, 100);
-    return null;
-  }
+  const { toast } = useToast();
   
   const handleSelectPlan = (planId: string) => {
     console.log(`Selecionando plano ${planId}`);
+    
+    // If user is not logged in, redirect to auth page
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Faça login para selecionar um plano",
+      });
+      navigate('/auth');
+      return;
+    }
+    
     // Here you would implement your payment flow
     // For now, we'll just redirect to dashboard with a simulated plan
     navigate('/dashboard');

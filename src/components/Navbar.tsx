@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth"; // We'll create this hook
+import { useAuth } from "@/hooks/useAuth"; 
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,13 +34,13 @@ const Navbar = () => {
           <Link to="/como-funciona" className="text-gray-700 hover:text-gray-900 font-medium">
             Como Funciona
           </Link>
+          <Link to="/planos" className="text-gray-700 hover:text-gray-900 font-medium">
+            Planos
+          </Link>
           {user ? (
             <>
               <Link to="/dashboard" className="text-gray-700 hover:text-gray-900 font-medium">
                 Dashboard
-              </Link>
-              <Link to="/planos" className="text-gray-700 hover:text-gray-900 font-medium">
-                Planos
               </Link>
               <Button variant="outline" onClick={signOut}>
                 Sair
@@ -79,6 +79,13 @@ const Navbar = () => {
             >
               Como Funciona
             </Link>
+            <Link 
+              to="/planos" 
+              className="text-gray-700 hover:text-gray-900 font-medium py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Planos
+            </Link>
             {user ? (
               <>
                 <Link 
@@ -87,13 +94,6 @@ const Navbar = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
-                </Link>
-                <Link 
-                  to="/planos" 
-                  className="text-gray-700 hover:text-gray-900 font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Planos
                 </Link>
                 <Button variant="outline" onClick={() => { signOut(); setIsMenuOpen(false); }}>
                   Sair

@@ -30,19 +30,12 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/conectar" element={<Conectar />} />
+            <Route path="/planos" element={<Planos />} />
             <Route 
               path="/dashboard" 
               element={
                 <ProtectedRoute>
                   <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/planos" 
-              element={
-                <ProtectedRoute>
-                  <Planos />
                 </ProtectedRoute>
               } 
             />

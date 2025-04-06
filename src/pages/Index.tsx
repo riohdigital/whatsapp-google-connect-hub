@@ -2,8 +2,8 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, Lock, Mail, Calendar, AlertCircle, MessageSquare, 
-  Edit, DollarSign, Globe, Calculator, Users, Zap, Robot, 
-  BrainCircuit, Sparkles, Rocket, Bot, Laptop, CircuitBoard
+  Edit, DollarSign, Globe, Calculator, Users, Zap, Bot, 
+  BrainCircuit, Sparkles, Rocket, Laptop, CircuitBoard
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Clock } from "@/components/ui/clock-icon";
@@ -17,7 +17,7 @@ const Index = () => {
           <div className="flex items-center justify-center mb-6">
             <div className="relative">
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md">
-                <Robot className="w-10 h-10 text-brand-blue" />
+                <Bot className="w-10 h-10 text-brand-blue" />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-brand-red rounded-full flex items-center justify-center text-white font-bold">
                 <Zap className="w-4 h-4" />

@@ -1,7 +1,8 @@
 
 import { LucideProps } from "lucide-react";
 
-export const Clock = (props: LucideProps) => {
+// We're renaming this to CustomClock to avoid conflicts with the Lucide Clock component
+export const CustomClock = (props: LucideProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

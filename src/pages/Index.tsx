@@ -1,12 +1,13 @@
+
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, Lock, Mail, Calendar, AlertCircle, MessageSquare, 
   Edit, DollarSign, Globe, Calculator, Users, Zap, Bot, 
-  BrainCircuit, Sparkles, Rocket, Laptop, CircuitBoard
+  BrainCircuit, Sparkles, Rocket, Laptop, CircuitBoard,
+  Clock
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Clock } from "@/components/ui/clock-icon";
 
 const Index = () => {
   return (
@@ -71,7 +72,7 @@ const Index = () => {
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <CircuitBoard className="text-blue-500 w-6 h-6" />
+                <Clock className="text-blue-500 w-6 h-6" />
               </div>
               <p className="font-medium">Mestre do Tempo</p>
             </div>

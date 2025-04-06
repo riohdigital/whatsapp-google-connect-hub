@@ -1,10 +1,11 @@
-
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Calendar, ArrowRight, CheckCircle2, AlertCircle, Loader2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   initGoogleOAuthClient, 
   sendCodeToBackend,
@@ -21,9 +22,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 
-// Configurações do ambiente
 const GOOGLE_CLIENT_ID = "414232145280-as5a3ntt18cj35c97gadceaaadstrsja.apps.googleusercontent.com"; 
-// Use o URL completo da função Edge, incluindo o ID do projeto Supabase
 const SUPABASE_EDGE_FUNCTION_URL = "https://uoeshejtkzngnqxtqtbl.supabase.co/functions/v1/auth-google-exchange"; 
 
 const Conectar = () => {
@@ -37,8 +36,9 @@ const Conectar = () => {
   const [isRedirectUriError, setIsRedirectUriError] = useState(false);
   const [configTimestamp, setConfigTimestamp] = useState<number | undefined>(undefined);
   const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
   
-  // Google OAuth Configuration
   const googleScopes = [
     "email", 
     "profile", 
@@ -46,15 +46,23 @@ const Conectar = () => {
     "https://www.googleapis.com/auth/calendar.events"
   ];
   
-  // Verificar estado de autenticação ao carregar
   useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Você precisa estar logado para conectar sua conta Google",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+    
     const authState = checkLocalAuthState();
     if (authState?.authenticated) {
       setIsAuthorized(true);
       setUserEmail(authState.email);
     }
     
-    // Limpar estados de erro anteriores
     setAuthError(null);
     setErrorDetails(null);
     setIsRedirectUriError(false);
@@ -63,9 +71,8 @@ const Conectar = () => {
       urlAtual: window.location.href,
       edgeFunctionUrl: SUPABASE_EDGE_FUNCTION_URL
     });
-  }, []);
+  }, [user, navigate, toast]);
   
-  // Carregar o script do Google Identity Services
   useEffect(() => {
     const loadGoogleScript = () => {
       if (document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
@@ -94,7 +101,6 @@ const Conectar = () => {
     
     console.log("Iniciando processo de autenticação");
     
-    // Verificar se a biblioteca do Google foi carregada
     if (!(window as any).google?.accounts?.oauth2) {
       const errorMsg = "Biblioteca do Google não carregada. Recarregue a página e tente novamente.";
       console.error(errorMsg);
@@ -112,15 +118,12 @@ const Conectar = () => {
       try {
         console.log("Código de autorização recebido:", response.code.substring(0, 10) + "...");
         
-        // Enviar o código para o backend (Supabase Edge Function)
-        console.log("Enviando código para o backend:", SUPABASE_EDGE_FUNCTION_URL);
         const result = await sendCodeToBackend(response.code, SUPABASE_EDGE_FUNCTION_URL);
         console.log("Resposta do backend:", result);
         
         setIsAuthorized(true);
         setUserEmail(result.email);
         
-        // Salvar estado de autenticação
         saveLocalAuthState(result.email);
         
         toast({
@@ -130,7 +133,6 @@ const Conectar = () => {
       } catch (error) {
         console.error("Erro detalhado durante autenticação:", error);
         
-        // Verificar se é um erro de redirect_uri_mismatch
         if (error instanceof Error && (error as any).redirectUriMismatch) {
           setIsRedirectUriError(true);
           setAuthError(error.message);
@@ -140,11 +142,9 @@ const Conectar = () => {
             setErrorDetails(`O URI de redirecionamento configurado (${redirectUri}) precisa ser adicionado no Console Google Cloud.`);
           }
           
-          // Salvar o timestamp para mostrar quanto tempo se passou desde a configuração
           if ((error as any).configTimestamp) {
             setConfigTimestamp((error as any).configTimestamp);
           } else {
-            // Se não houver timestamp, vamos definir um agora para começar a contagem
             setConfigTimestamp(Date.now());
           }
           
@@ -157,9 +157,7 @@ const Conectar = () => {
           const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
           setAuthError(errorMessage);
           
-          // Extrair mais detalhes do erro sem usar a propriedade 'cause'
           if (error instanceof Error) {
-            // Se o erro tiver alguma estrutura adicional, tente extraí-la como string
             const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
             setErrorDetails(errorStr);
           }
@@ -188,7 +186,6 @@ const Conectar = () => {
         callbackFunction: handleOAuthResponse,
       });
       
-      // Iniciar o fluxo de autenticação
       console.log("Solicitando código de autorização");
       client.requestCode();
     } catch (error) {
@@ -230,7 +227,6 @@ const Conectar = () => {
     
     setIsLoading(true);
     
-    // Enviar credenciais para o webhook do n8n
     fetch(n8nWebhookUrl, {
       method: "POST",
       headers: {
@@ -269,7 +265,6 @@ const Conectar = () => {
 
   return (
     <Layout>
-      {/* Header */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-16">
         <div className="container mx-auto px-6 md:px-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Conectar Conta Google</h1>
@@ -279,7 +274,6 @@ const Conectar = () => {
         </div>
       </section>
       
-      {/* Connection Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6 md:px-12">
           <div className="max-w-3xl mx-auto">

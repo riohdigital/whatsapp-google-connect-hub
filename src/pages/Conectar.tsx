@@ -15,6 +15,7 @@ import {
 
 // Configurações do ambiente
 const GOOGLE_CLIENT_ID = "414232145280-as5a3ntt18cj35c97gadceaaadstrsja.apps.googleusercontent.com"; 
+// Use o URL completo da função Edge, incluindo o ID do projeto Supabase
 const SUPABASE_EDGE_FUNCTION_URL = "https://uoeshejtkzngnqxtqtbl.supabase.co/functions/v1/auth-google-exchange"; 
 
 const Conectar = () => {
@@ -24,6 +25,7 @@ const Conectar = () => {
   const [n8nWebhookUrl, setN8nWebhookUrl] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   
   // Google OAuth Configuration
   const googleScopes = [
@@ -40,6 +42,15 @@ const Conectar = () => {
       setIsAuthorized(true);
       setUserEmail(authState.email);
     }
+    
+    // Limpar estados de erro anteriores
+    setAuthError(null);
+    setErrorDetails(null);
+    
+    console.log("Página Conectar iniciada - Ambiente:", {
+      urlAtual: window.location.href,
+      edgeFunctionUrl: SUPABASE_EDGE_FUNCTION_URL
+    });
   }, []);
   
   // Carregar o script do Google Identity Services
@@ -65,15 +76,21 @@ const Conectar = () => {
   const handleGoogleAuth = () => {
     setIsLoading(true);
     setAuthError(null);
+    setErrorDetails(null);
+    
+    console.log("Iniciando processo de autenticação");
     
     // Verificar se a biblioteca do Google foi carregada
     if (!(window as any).google?.accounts?.oauth2) {
+      const errorMsg = "Biblioteca do Google não carregada. Recarregue a página e tente novamente.";
+      console.error(errorMsg);
       toast({
         title: "Erro de carregamento",
-        description: "Biblioteca do Google não carregada. Recarregue a página e tente novamente.",
+        description: errorMsg,
         variant: "destructive",
       });
       setIsLoading(false);
+      setAuthError(errorMsg);
       return;
     }
     
@@ -100,6 +117,12 @@ const Conectar = () => {
         console.error("Erro detalhado durante autenticação:", error);
         const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
         setAuthError(errorMessage);
+        
+        // Tentar extrair mais detalhes do erro
+        if (error instanceof Error && error.cause) {
+          setErrorDetails(JSON.stringify(error.cause));
+        }
+        
         toast({
           title: "Falha na autenticação",
           description: errorMessage,
@@ -113,6 +136,9 @@ const Conectar = () => {
     
     try {
       console.log("Iniciando fluxo de autenticação com Google");
+      console.log("Client ID:", GOOGLE_CLIENT_ID);
+      console.log("Escopos solicitados:", googleScopes.join(', '));
+      
       const client = initGoogleOAuthClient({
         clientId: GOOGLE_CLIENT_ID,
         scopes: googleScopes,
@@ -126,9 +152,14 @@ const Conectar = () => {
       console.error("Erro ao iniciar autenticação:", error);
       setIsLoading(false);
       
+      const errorMsg = error instanceof Error 
+        ? `Erro na inicialização: ${error.message}` 
+        : "Não foi possível iniciar o processo de autenticação Google.";
+      
+      setAuthError(errorMsg);
       toast({
         title: "Erro na inicialização",
-        description: "Não foi possível iniciar o processo de autenticação Google.",
+        description: errorMsg,
         variant: "destructive",
       });
     }
@@ -237,10 +268,24 @@ const Conectar = () => {
                       <div>
                         <p className="font-medium text-red-800">Erro de autenticação</p>
                         <p className="text-red-700 text-sm">{authError}</p>
+                        {errorDetails && (
+                          <pre className="mt-2 p-2 bg-red-100 rounded text-xs overflow-auto max-h-40">
+                            {errorDetails}
+                          </pre>
+                        )}
                       </div>
                     </div>
                   </div>
                 )}
+                
+                <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg mb-6">
+                  <p className="text-blue-800 text-sm">
+                    <strong>URL da função Edge:</strong> {SUPABASE_EDGE_FUNCTION_URL}
+                  </p>
+                  <p className="text-blue-800 text-sm mt-1">
+                    <strong>Client ID:</strong> {GOOGLE_CLIENT_ID.substring(0, 12)}...
+                  </p>
+                </div>
                 
                 {!isAuthorized ? (
                   <Button 

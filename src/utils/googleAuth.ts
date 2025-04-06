@@ -33,7 +33,7 @@ export const initGoogleOAuthClient = ({
 // Send authorization code to backend (Supabase Edge Function)
 export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) => {
   try {
-    console.log(`Enviando código para: ${edgeFunctionUrl}`);
+    console.log(`Iniciando envio do código para: ${edgeFunctionUrl}`);
     console.log(`Tamanho do código: ${code.length} caracteres`);
     console.log(`Primeiros caracteres do código: ${code.substring(0, 10)}...`);
     
@@ -42,7 +42,12 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
       throw new Error(`URL da função inválida: ${edgeFunctionUrl}`);
     }
     
-    const response = await fetch(edgeFunctionUrl, {
+    // Adicionando timestamp para evitar cache
+    const urlWithParam = `${edgeFunctionUrl}?_=${Date.now()}`;
+    console.log(`URL final com param anti-cache: ${urlWithParam}`);
+    
+    console.log("Enviando requisição POST para a função Edge...");
+    const response = await fetch(urlWithParam, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,12 +56,15 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
     });
 
     console.log("Status da resposta:", response.status);
+    console.log("Headers da resposta:", Object.fromEntries([...response.headers.entries()]));
+    
     const responseText = await response.text();
     console.log("Texto da resposta:", responseText);
     
     let data;
     try {
       data = JSON.parse(responseText);
+      console.log("Dados parseados:", data);
     } catch (e) {
       console.error("Erro ao parsear resposta JSON:", e);
       throw new Error(`Resposta inválida do servidor: ${responseText}`);
@@ -69,7 +77,14 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
 
     return data;
   } catch (error) {
-    console.error('Erro ao enviar código para o backend:', error);
+    console.error('Erro detalhado ao enviar código para o backend:', error);
+    
+    // Adicionar mais detalhes de diagnóstico no erro
+    if (error instanceof Error) {
+      // Preservar a mensagem original e adicionar contexto
+      error.message = `Falha ao processar autenticação: ${error.message}`;
+    }
+    
     throw error;
   }
 };

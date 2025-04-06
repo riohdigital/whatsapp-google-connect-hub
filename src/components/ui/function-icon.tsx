@@ -30,13 +30,13 @@ export const FunctionIcon = ({
     
     switch (connectionPosition) {
       case "top":
-        return `${baseStyles} left-1/2 -translate-x-1/2 -top-16 h-16 border-l-0 border-r-0 border-b-0`;
+        return `${baseStyles} left-1/2 -translate-x-1/2 -top-[60px] h-[60px] w-0 border-l-2 border-r-0 border-b-0 border-t-0`;
       case "right":
-        return `${baseStyles} top-1/2 -translate-y-1/2 -right-16 w-16 border-t-0 border-b-0 border-l-0`;
+        return `${baseStyles} top-1/2 -translate-y-1/2 -right-[60px] w-[60px] h-0 border-t-0 border-b-0 border-l-0 border-r-0 border-t-2`;
       case "bottom":
-        return `${baseStyles} left-1/2 -translate-x-1/2 -bottom-16 h-16 border-l-0 border-r-0 border-t-0`;
+        return `${baseStyles} left-1/2 -translate-x-1/2 -bottom-[60px] h-[60px] w-0 border-l-2 border-r-0 border-b-0 border-t-0`;
       case "left":
-        return `${baseStyles} top-1/2 -translate-y-1/2 -left-16 w-16 border-t-0 border-b-0 border-r-0`;
+        return `${baseStyles} top-1/2 -translate-y-1/2 -left-[60px] w-[60px] h-0 border-t-0 border-b-0 border-r-0 border-t-2`;
       default:
         return "";
     }
@@ -44,7 +44,7 @@ export const FunctionIcon = ({
   
   return (
     <div className={cn("relative group", className)} {...props}>
-      {/* Invisible connection line */}
+      {/* Linha de conexão pontilhada */}
       {connected && (
         <div 
           className={cn(
@@ -59,7 +59,7 @@ export const FunctionIcon = ({
         <div className={cn("relative w-14 h-14 p-3 rounded-full flex items-center justify-center transition-all group-hover:scale-110", `bg-${iconColor.split('-')[1]}/10`)}>
           <Icon className={cn(iconColor, "w-8 h-8")} />
           
-          {/* Pulsing ring effect */}
+          {/* Efeito de pulsação */}
           <span className={cn("absolute inset-0 rounded-full opacity-0 group-hover:opacity-70 animate-ping", `bg-${iconColor.split('-')[1]}/30`)} />
         </div>
         

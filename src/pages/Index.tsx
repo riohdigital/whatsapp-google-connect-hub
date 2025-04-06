@@ -25,18 +25,19 @@ const Index = () => {
             Seu assistente digital brasileiro que vai facilitar seu dia a dia direto no seu WhatsApp!
           </p>
           
-          {/* Robô central flutuando */}
-          <div className="relative h-64 mb-12 mx-auto">
+          {/* Área do robô central com ícones de função */}
+          <div className="relative h-[400px] mb-12 mx-auto">
+            {/* Robô central flutuando */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <RobotAssistant size="lg" tentacleCount={8} className="animate-bounce-slow" />
             </div>
             
-            {/* Círculo de resplandor atrás do robô */}
+            {/* Círculos de resplandor atrás do robô */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-brand-blue/5 rounded-full animate-pulse-slow"></div>
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-brand-blue/3 rounded-full animate-pulse-slow" style={{ animationDelay: "0.5s" }}></div>
             
-            {/* Grade de ícones de funções em volta do robô */}
-            <div className="absolute inset-0 pointer-events-none">
+            {/* Grade de ícones de funções ao redor do robô */}
+            <div className="absolute inset-0">
               {/* Top */}
               <FunctionIcon 
                 icon={BrainCircuit} 
@@ -51,8 +52,8 @@ const Index = () => {
                 icon={Sparkles} 
                 iconColor="text-brand-red" 
                 label="Seus Emails"
-                connectionPosition="left"
-                className="absolute right-8 top-8"
+                connectionPosition="bottom-left"
+                className="absolute right-1/4 top-[15%]"
               />
               
               {/* Right */}
@@ -69,8 +70,8 @@ const Index = () => {
                 icon={Rocket} 
                 iconColor="text-brand-green" 
                 label="Criação de Textos"
-                connectionPosition="top"
-                className="absolute right-8 bottom-8"
+                connectionPosition="top-left"
+                className="absolute right-1/4 bottom-[15%]"
               />
               
               {/* Bottom */}
@@ -88,8 +89,8 @@ const Index = () => {
                 icon={CircuitBoard} 
                 iconColor="text-blue-500" 
                 label="Mestre do Tempo"
-                connectionPosition="top"
-                className="absolute left-8 bottom-8"
+                connectionPosition="top-right"
+                className="absolute left-1/4 bottom-[15%]"
               />
               
               {/* Left */}
@@ -106,9 +107,48 @@ const Index = () => {
                 icon={Zap} 
                 iconColor="text-amber-500" 
                 label="Cálculos Rápidos"
-                connectionPosition="right"
-                className="absolute left-8 top-8"
+                connectionPosition="bottom-right"
+                className="absolute left-1/4 top-[15%]"
               />
+              
+              {/* Linhas diagonais para conexões */}
+              <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                {/* Linha Top-Right */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="75%" y2="15%" 
+                  stroke="#EA4335" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Linha Top-Left */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="25%" y2="15%" 
+                  stroke="#FBBC05" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Linha Bottom-Left */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="25%" y2="85%" 
+                  stroke="#4285F4" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Linha Bottom-Right */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="75%" y2="85%" 
+                  stroke="#34A853" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+              </svg>
             </div>
           </div>
           

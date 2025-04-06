@@ -2,7 +2,7 @@
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Calendar, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Mail, Calendar, ArrowRight, CheckCircle2, AlertCircle, Loader2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -26,6 +26,7 @@ const Conectar = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [isRedirectUriError, setIsRedirectUriError] = useState(false);
   
   // Google OAuth Configuration
   const googleScopes = [
@@ -46,6 +47,7 @@ const Conectar = () => {
     // Limpar estados de erro anteriores
     setAuthError(null);
     setErrorDetails(null);
+    setIsRedirectUriError(false);
     
     console.log("Página Conectar iniciada - Ambiente:", {
       urlAtual: window.location.href,
@@ -77,6 +79,7 @@ const Conectar = () => {
     setIsLoading(true);
     setAuthError(null);
     setErrorDetails(null);
+    setIsRedirectUriError(false);
     
     console.log("Iniciando processo de autenticação");
     
@@ -115,21 +118,40 @@ const Conectar = () => {
         });
       } catch (error) {
         console.error("Erro detalhado durante autenticação:", error);
-        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
-        setAuthError(errorMessage);
         
-        // Extrair mais detalhes do erro sem usar a propriedade 'cause'
-        if (error instanceof Error) {
-          // Se o erro tiver alguma estrutura adicional, tente extraí-la como string
-          const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
-          setErrorDetails(errorStr);
+        // Verificar se é um erro de redirect_uri_mismatch
+        if (error instanceof Error && (error as any).redirectUriMismatch) {
+          setIsRedirectUriError(true);
+          setAuthError(error.message);
+          
+          const redirectUri = (error as any).responseData?.details?.configured_uri;
+          if (redirectUri) {
+            setErrorDetails(`O URI de redirecionamento configurado (${redirectUri}) precisa ser adicionado no Console Google Cloud.`);
+          }
+          
+          toast({
+            title: "Erro de configuração",
+            description: "Problema com o URI de redirecionamento no Google Cloud Console.",
+            variant: "destructive",
+          });
+        } else {
+          const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
+          setAuthError(errorMessage);
+          
+          // Extrair mais detalhes do erro sem usar a propriedade 'cause'
+          if (error instanceof Error) {
+            // Se o erro tiver alguma estrutura adicional, tente extraí-la como string
+            const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
+            setErrorDetails(errorStr);
+          }
+          
+          toast({
+            title: "Falha na autenticação",
+            description: errorMessage,
+            variant: "destructive",
+          });
         }
         
-        toast({
-          title: "Falha na autenticação",
-          description: errorMessage,
-          variant: "destructive",
-        });
         clearLocalAuthState();
       } finally {
         setIsLoading(false);
@@ -266,11 +288,29 @@ const Conectar = () => {
                 {authError && (
                   <div className="mb-6 p-4 border border-red-200 bg-red-50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <AlertCircle className="text-red-500" />
+                      <AlertCircle className="text-red-500 shrink-0" />
                       <div>
                         <p className="font-medium text-red-800">Erro de autenticação</p>
                         <p className="text-red-700 text-sm">{authError}</p>
-                        {errorDetails && (
+                        {isRedirectUriError && (
+                          <div className="mt-3 p-3 border border-red-300 bg-red-100 rounded-md">
+                            <p className="text-red-800 font-medium mb-2">Problema de URI de Redirecionamento</p>
+                            <p className="text-red-700 text-sm mb-2">{errorDetails}</p>
+                            <p className="text-red-700 text-sm mb-3">Você precisa adicionar este URI exato nas configurações do seu projeto no Google Cloud Console:</p>
+                            <div className="bg-red-200 p-2 rounded flex items-center justify-between">
+                              <code className="text-sm font-mono text-red-900">https://whatsapp-google-connect-hub.lovable.app/conectar</code>
+                            </div>
+                            <a 
+                              href="https://console.cloud.google.com/apis/credentials" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="mt-3 text-red-700 flex items-center gap-1 hover:underline text-sm"
+                            >
+                              Abrir Google Cloud Console <ExternalLink size={14} />
+                            </a>
+                          </div>
+                        )}
+                        {!isRedirectUriError && errorDetails && (
                           <pre className="mt-2 p-2 bg-red-100 rounded text-xs overflow-auto max-h-40">
                             {errorDetails}
                           </pre>
@@ -286,6 +326,9 @@ const Conectar = () => {
                   </p>
                   <p className="text-blue-800 text-sm mt-1">
                     <strong>Client ID:</strong> {GOOGLE_CLIENT_ID.substring(0, 12)}...
+                  </p>
+                  <p className="text-blue-800 text-sm mt-1">
+                    <strong>URI de redirecionamento:</strong> https://whatsapp-google-connect-hub.lovable.app/conectar
                   </p>
                 </div>
                 

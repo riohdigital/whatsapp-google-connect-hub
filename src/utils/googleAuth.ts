@@ -75,6 +75,20 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
 
     if (!response.ok) {
       console.error("Resposta não-OK do servidor:", data);
+      
+      // Tratamento específico para erro de redirect_uri_mismatch
+      if (data.error_type === "redirect_uri_mismatch") {
+        const error = new Error(
+          "Erro de configuração no Google Cloud Console: O URI de redirecionamento não corresponde " +
+          "ao configurado. Verifique se o URI " + data.details?.configured_uri + 
+          " está listado nas URIs de redirecionamento autorizadas no Console Google Cloud."
+        );
+        (error as any).statusCode = response.status;
+        (error as any).responseData = data;
+        (error as any).redirectUriMismatch = true;
+        throw error;
+      }
+      
       const error = new Error(data.error || `Falha na autenticação (${response.status}): ${JSON.stringify(data)}`);
       // Adicionar informações extras ao erro sem usar a propriedade cause
       (error as any).statusCode = response.status;

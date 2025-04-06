@@ -132,6 +132,31 @@ serve(async (req) => {
     }
     
     if (tokenData.error) {
+      // Tratamento específico para o erro de redirect_uri_mismatch
+      if (tokenData.error === "redirect_uri_mismatch") {
+        console.error("Erro de redirecionamento URI:", {
+          error: tokenData.error,
+          error_description: tokenData.error_description,
+          configured_uri: REDIRECT_URI
+        });
+        
+        return new Response(
+          JSON.stringify({
+            error: "Erro de configuração no Google Cloud Console",
+            error_type: "redirect_uri_mismatch",
+            message: "O URI de redirecionamento não corresponde ao configurado no Google Cloud Console.",
+            details: {
+              configured_uri: REDIRECT_URI,
+              suggestion: "Certifique-se que este URI exato esteja adicionado nas URIs de redirecionamento autorizadas no Console Google Cloud."
+            }
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+      
       console.error("Erro retornado pela API do Google:", {
         error: tokenData.error,
         error_description: tokenData.error_description,

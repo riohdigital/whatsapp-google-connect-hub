@@ -118,9 +118,11 @@ const Conectar = () => {
         const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
         setAuthError(errorMessage);
         
-        // Tentar extrair mais detalhes do erro
-        if (error instanceof Error && error.cause) {
-          setErrorDetails(JSON.stringify(error.cause));
+        // Extrair mais detalhes do erro sem usar a propriedade 'cause'
+        if (error instanceof Error) {
+          // Se o erro tiver alguma estrutura adicional, tente extraí-la como string
+          const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
+          setErrorDetails(errorStr);
         }
         
         toast({

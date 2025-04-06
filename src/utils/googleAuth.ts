@@ -67,22 +67,32 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
       console.log("Dados parseados:", data);
     } catch (e) {
       console.error("Erro ao parsear resposta JSON:", e);
-      throw new Error(`Resposta inválida do servidor: ${responseText}`);
+      const error = new Error(`Resposta inválida do servidor: ${responseText}`);
+      // Adicionar informações extras ao erro sem usar a propriedade cause
+      (error as any).responseText = responseText;
+      throw error;
     }
 
     if (!response.ok) {
       console.error("Resposta não-OK do servidor:", data);
-      throw new Error(data.error || `Falha na autenticação (${response.status}): ${JSON.stringify(data)}`);
+      const error = new Error(data.error || `Falha na autenticação (${response.status}): ${JSON.stringify(data)}`);
+      // Adicionar informações extras ao erro sem usar a propriedade cause
+      (error as any).statusCode = response.status;
+      (error as any).responseData = data;
+      throw error;
     }
 
     return data;
   } catch (error) {
     console.error('Erro detalhado ao enviar código para o backend:', error);
     
-    // Adicionar mais detalhes de diagnóstico no erro
+    // Adicionar mais detalhes de diagnóstico no erro sem usar cause
     if (error instanceof Error) {
       // Preservar a mensagem original e adicionar contexto
       error.message = `Falha ao processar autenticação: ${error.message}`;
+      
+      // Enriquecer o objeto de erro com informações adicionais sem usar cause
+      console.log("Erro detalhado:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
     }
     
     throw error;

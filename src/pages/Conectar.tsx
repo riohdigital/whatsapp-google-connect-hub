@@ -1,15 +1,17 @@
 
-import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { checkLocalAuthState, clearLocalAuthState } from "@/utils/googleAuth";
-import GoogleOAuthButton from "@/components/GoogleOAuthButton";
-import ConnectionStatus from "@/components/ConnectionStatus";
-import WebhookConfig from "@/components/WebhookConfig";
-import ErrorDisplay from "@/components/ErrorDisplay";
-import ConnectionBenefits from "@/components/ConnectionBenefits";
-import ConnectionPermissions from "@/components/ConnectionPermissions";
-import ConnectionInfo from "@/components/ConnectionInfo";
+import { Mail, Calendar, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  initGoogleOAuthClient, 
+  sendCodeToBackend,
+  checkLocalAuthState,
+  saveLocalAuthState,
+  clearLocalAuthState
+} from "@/utils/googleAuth";
 
 // Configurações do ambiente
 const GOOGLE_CLIENT_ID = "414232145280-as5a3ntt18cj35c97gadceaaadstrsja.apps.googleusercontent.com"; 
@@ -17,10 +19,39 @@ const GOOGLE_CLIENT_ID = "414232145280-as5a3ntt18cj35c97gadceaaadstrsja.apps.goo
 const SUPABASE_EDGE_FUNCTION_URL = "https://uoeshejtkzngnqxtqtbl.supabase.co/functions/v1/auth-google-exchange"; 
 
 const Conectar = () => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [n8nWebhookUrl, setN8nWebhookUrl] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  
+  // Google OAuth Configuration
+  const googleScopes = [
+    "email", 
+    "profile", 
+    "https://mail.google.com/", 
+    "https://www.googleapis.com/auth/calendar.events"
+  ];
+  
+  // Verificar estado de autenticação ao carregar
+  useEffect(() => {
+    const authState = checkLocalAuthState();
+    if (authState?.authenticated) {
+      setIsAuthorized(true);
+      setUserEmail(authState.email);
+    }
+    
+    // Limpar estados de erro anteriores
+    setAuthError(null);
+    setErrorDetails(null);
+    
+    console.log("Página Conectar iniciada - Ambiente:", {
+      urlAtual: window.location.href,
+      edgeFunctionUrl: SUPABASE_EDGE_FUNCTION_URL
+    });
+  }, []);
   
   // Carregar o script do Google Identity Services
   useEffect(() => {
@@ -41,39 +72,154 @@ const Conectar = () => {
 
     loadGoogleScript();
   }, []);
-  
-  // Verificar estado de autenticação ao carregar
-  useEffect(() => {
-    const authState = checkLocalAuthState();
-    if (authState?.authenticated) {
-      setIsAuthorized(true);
-      setUserEmail(authState.email);
-    }
-    
-    // Limpar estados de erro anteriores
+
+  const handleGoogleAuth = () => {
+    setIsLoading(true);
     setAuthError(null);
     setErrorDetails(null);
     
-    console.log("Página Conectar iniciada - Ambiente:", {
-      urlAtual: window.location.href,
-      edgeFunctionUrl: SUPABASE_EDGE_FUNCTION_URL
-    });
-  }, []);
-
-  const handleAuthSuccess = (email: string) => {
-    setIsAuthorized(true);
-    setUserEmail(email);
-  };
-
-  const handleAuthError = (errorMessage: string, details?: string) => {
-    setAuthError(errorMessage);
-    setErrorDetails(details || null);
+    console.log("Iniciando processo de autenticação");
+    
+    // Verificar se a biblioteca do Google foi carregada
+    if (!(window as any).google?.accounts?.oauth2) {
+      const errorMsg = "Biblioteca do Google não carregada. Recarregue a página e tente novamente.";
+      console.error(errorMsg);
+      toast({
+        title: "Erro de carregamento",
+        description: errorMsg,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      setAuthError(errorMsg);
+      return;
+    }
+    
+    const handleOAuthResponse = async (response: { code: string }) => {
+      try {
+        console.log("Código de autorização recebido:", response.code.substring(0, 10) + "...");
+        
+        // Enviar o código para o backend (Supabase Edge Function)
+        console.log("Enviando código para o backend:", SUPABASE_EDGE_FUNCTION_URL);
+        const result = await sendCodeToBackend(response.code, SUPABASE_EDGE_FUNCTION_URL);
+        console.log("Resposta do backend:", result);
+        
+        setIsAuthorized(true);
+        setUserEmail(result.email);
+        
+        // Salvar estado de autenticação
+        saveLocalAuthState(result.email);
+        
+        toast({
+          title: "Autenticação realizada",
+          description: `Sua conta Google (${result.email}) foi conectada com sucesso!`,
+        });
+      } catch (error) {
+        console.error("Erro detalhado durante autenticação:", error);
+        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
+        setAuthError(errorMessage);
+        
+        // Extrair mais detalhes do erro sem usar a propriedade 'cause'
+        if (error instanceof Error) {
+          // Se o erro tiver alguma estrutura adicional, tente extraí-la como string
+          const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
+          setErrorDetails(errorStr);
+        }
+        
+        toast({
+          title: "Falha na autenticação",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        clearLocalAuthState();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    try {
+      console.log("Iniciando fluxo de autenticação com Google");
+      console.log("Client ID:", GOOGLE_CLIENT_ID);
+      console.log("Escopos solicitados:", googleScopes.join(', '));
+      
+      const client = initGoogleOAuthClient({
+        clientId: GOOGLE_CLIENT_ID,
+        scopes: googleScopes,
+        callbackFunction: handleOAuthResponse,
+      });
+      
+      // Iniciar o fluxo de autenticação
+      console.log("Solicitando código de autorização");
+      client.requestCode();
+    } catch (error) {
+      console.error("Erro ao iniciar autenticação:", error);
+      setIsLoading(false);
+      
+      const errorMsg = error instanceof Error 
+        ? `Erro na inicialização: ${error.message}` 
+        : "Não foi possível iniciar o processo de autenticação Google.";
+      
+      setAuthError(errorMsg);
+      toast({
+        title: "Erro na inicialização",
+        description: errorMsg,
+        variant: "destructive",
+      });
+    }
   };
   
   const handleLogout = () => {
     setIsAuthorized(false);
     setUserEmail(null);
     clearLocalAuthState();
+    toast({
+      title: "Desconectado",
+      description: "Sua conta Google foi desconectada com sucesso.",
+    });
+  };
+  
+  const handleConfigureWebhook = () => {
+    if (!n8nWebhookUrl) {
+      toast({
+        title: "URL necessária",
+        description: "Por favor, insira a URL do webhook do n8n",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Enviar credenciais para o webhook do n8n
+    fetch(n8nWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: userEmail,
+        status: "connected",
+      }),
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Falha ao enviar para webhook");
+        return response.json();
+      })
+      .then(() => {
+        toast({
+          title: "Credenciais enviadas",
+          description: "As credenciais foram enviadas com sucesso para o n8n!",
+        });
+      })
+      .catch(error => {
+        toast({
+          title: "Erro ao enviar credenciais",
+          description: error.message,
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -101,35 +247,162 @@ const Conectar = () => {
                     do Google para conceder acesso ao seu Gmail e Google Calendar.
                   </p>
                   
-                  <ConnectionPermissions />
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="text-green-500" />
+                      <span className="text-gray-700">Acesso ao Gmail para leitura de emails</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="text-green-500" />
+                      <span className="text-gray-700">Acesso ao Google Calendar para gerenciamento de eventos</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 className="text-green-500" />
+                      <span className="text-gray-700">Você pode revogar o acesso a qualquer momento</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <ErrorDisplay errorMessage={authError || ''} errorDetails={errorDetails} />
-                
-                <ConnectionInfo 
-                  edgeFunctionUrl={SUPABASE_EDGE_FUNCTION_URL}
-                  clientId={GOOGLE_CLIENT_ID}
-                />
-                
-                {!isAuthorized ? (
-                  <GoogleOAuthButton
-                    clientId={GOOGLE_CLIENT_ID}
-                    edgeFunctionUrl={SUPABASE_EDGE_FUNCTION_URL}
-                    onAuthSuccess={handleAuthSuccess}
-                    onAuthError={handleAuthError}
-                  />
-                ) : (
-                  <div className="mb-8">
-                    <ConnectionStatus userEmail={userEmail} />
-                    
-                    <WebhookConfig
-                      userEmail={userEmail}
-                      onLogout={handleLogout}
-                    />
+                {authError && (
+                  <div className="mb-6 p-4 border border-red-200 bg-red-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="text-red-500" />
+                      <div>
+                        <p className="font-medium text-red-800">Erro de autenticação</p>
+                        <p className="text-red-700 text-sm">{authError}</p>
+                        {errorDetails && (
+                          <pre className="mt-2 p-2 bg-red-100 rounded text-xs overflow-auto max-h-40">
+                            {errorDetails}
+                          </pre>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
                 
-                <ConnectionBenefits />
+                <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg mb-6">
+                  <p className="text-blue-800 text-sm">
+                    <strong>URL da função Edge:</strong> {SUPABASE_EDGE_FUNCTION_URL}
+                  </p>
+                  <p className="text-blue-800 text-sm mt-1">
+                    <strong>Client ID:</strong> {GOOGLE_CLIENT_ID.substring(0, 12)}...
+                  </p>
+                </div>
+                
+                {!isAuthorized ? (
+                  <Button 
+                    onClick={handleGoogleAuth}
+                    disabled={isLoading}
+                    className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 w-full justify-center gap-3 mb-6"
+                    size="lg"
+                  >
+                    <div className="flex space-x-1">
+                      <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                      <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                      <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                      <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                    </div>
+                    <span>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Autorizando...
+                        </>
+                      ) : (
+                        "Autorizar com Google"
+                      )}
+                    </span>
+                  </Button>
+                ) : (
+                  <div className="mb-8">
+                    <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg mb-8">
+                      <CheckCircle2 className="text-green-600" />
+                      <div>
+                        <p className="font-medium text-green-800">Conta Google conectada</p>
+                        <p className="text-green-700 text-sm">
+                          {userEmail ? `${userEmail} autenticado com sucesso` : 'Sua autenticação foi concluída com sucesso'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold mb-4">Configurar Webhook do n8n</h3>
+                    <p className="text-gray-600 mb-4">
+                      Agora você precisa inserir a URL do webhook do n8n para enviar as credenciais de acesso:
+                    </p>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="webhook" className="block text-sm font-medium text-gray-700 mb-1">
+                          URL do Webhook
+                        </label>
+                        <input
+                          type="text"
+                          id="webhook"
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          placeholder="https://seu-n8n.exemplo.com/webhook/..."
+                          value={n8nWebhookUrl}
+                          onChange={(e) => setN8nWebhookUrl(e.target.value)}
+                        />
+                      </div>
+                      
+                      <Button 
+                        onClick={handleConfigureWebhook}
+                        disabled={isLoading || !n8nWebhookUrl}
+                        className="w-full"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Enviando credenciais...
+                          </>
+                        ) : (
+                          "Enviar credenciais para n8n"
+                        )}
+                      </Button>
+                      
+                      <Button
+                        onClick={handleLogout}
+                        variant="outline"
+                        className="w-full mt-4"
+                      >
+                        Desconectar conta Google
+                      </Button>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm mt-4">
+                        <AlertCircle className="text-yellow-600 w-5 h-5 shrink-0" />
+                        <p className="text-yellow-700">
+                          Em um ambiente de produção, este passo seria automatizado e seguro, sem expor a URL do webhook.
+                          As credenciais reais são armazenadas no Supabase.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="border-t border-gray-200 pt-6">
+                  <h3 className="text-lg font-medium mb-3">O que acontece depois?</h3>
+                  <p className="text-gray-600 mb-4">
+                    Após a autorização, seu assistente WhatsApp estará habilitado para:
+                  </p>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex gap-3">
+                      <Mail className="text-blue-500 shrink-0" />
+                      <div>
+                        <p className="font-medium">Acessar seus emails</p>
+                        <p className="text-sm text-gray-500">Ler e notificar sobre emails importantes</p>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex gap-3">
+                      <Calendar className="text-green-500 shrink-0" />
+                      <div>
+                        <p className="font-medium">Gerenciar eventos</p>
+                        <p className="text-sm text-gray-500">Criar e lembrá-lo de compromissos</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -86,6 +86,7 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
         (error as any).statusCode = response.status;
         (error as any).responseData = data;
         (error as any).redirectUriMismatch = true;
+        (error as any).configTimestamp = Date.now(); // Adicionando timestamp da configuração
         throw error;
       }
       
@@ -140,3 +141,21 @@ export const saveLocalAuthState = (email: string) => {
 export const clearLocalAuthState = () => {
   localStorage.removeItem('googleAuthState');
 };
+
+// Função para calcular tempo decorrido desde a configuração
+export const getConfigTimeElapsed = (configTimestamp?: number): string => {
+  if (!configTimestamp) return "";
+  
+  const now = Date.now();
+  const elapsedMs = now - configTimestamp;
+  const minutes = Math.floor(elapsedMs / 60000);
+  
+  if (minutes < 1) return "menos de 1 minuto";
+  if (minutes === 1) return "1 minuto";
+  if (minutes < 60) return `${minutes} minutos`;
+  
+  const hours = Math.floor(minutes / 60);
+  if (hours === 1) return "1 hora";
+  return `${hours} horas`;
+};
+

@@ -12,6 +12,14 @@ import {
   saveLocalAuthState,
   clearLocalAuthState
 } from "@/utils/googleAuth";
+import { GoogleOAuthError } from "@/components/GoogleOAuthError";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
 
 // Configurações do ambiente
 const GOOGLE_CLIENT_ID = "414232145280-as5a3ntt18cj35c97gadceaaadstrsja.apps.googleusercontent.com"; 
@@ -27,6 +35,8 @@ const Conectar = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [isRedirectUriError, setIsRedirectUriError] = useState(false);
+  const [configTimestamp, setConfigTimestamp] = useState<number | undefined>(undefined);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
   
   // Google OAuth Configuration
   const googleScopes = [
@@ -80,6 +90,7 @@ const Conectar = () => {
     setAuthError(null);
     setErrorDetails(null);
     setIsRedirectUriError(false);
+    setConfigTimestamp(undefined);
     
     console.log("Iniciando processo de autenticação");
     
@@ -127,6 +138,14 @@ const Conectar = () => {
           const redirectUri = (error as any).responseData?.details?.configured_uri;
           if (redirectUri) {
             setErrorDetails(`O URI de redirecionamento configurado (${redirectUri}) precisa ser adicionado no Console Google Cloud.`);
+          }
+          
+          // Salvar o timestamp para mostrar quanto tempo se passou desde a configuração
+          if ((error as any).configTimestamp) {
+            setConfigTimestamp((error as any).configTimestamp);
+          } else {
+            // Se não houver timestamp, vamos definir um agora para começar a contagem
+            setConfigTimestamp(Date.now());
           }
           
           toast({
@@ -244,6 +263,10 @@ const Conectar = () => {
       });
   };
 
+  const openConfigHelp = () => {
+    setShowConfigDialog(true);
+  };
+
   return (
     <Layout>
       {/* Header */}
@@ -286,38 +309,12 @@ const Conectar = () => {
                 </div>
                 
                 {authError && (
-                  <div className="mb-6 p-4 border border-red-200 bg-red-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <AlertCircle className="text-red-500 shrink-0" />
-                      <div>
-                        <p className="font-medium text-red-800">Erro de autenticação</p>
-                        <p className="text-red-700 text-sm">{authError}</p>
-                        {isRedirectUriError && (
-                          <div className="mt-3 p-3 border border-red-300 bg-red-100 rounded-md">
-                            <p className="text-red-800 font-medium mb-2">Problema de URI de Redirecionamento</p>
-                            <p className="text-red-700 text-sm mb-2">{errorDetails}</p>
-                            <p className="text-red-700 text-sm mb-3">Você precisa adicionar este URI exato nas configurações do seu projeto no Google Cloud Console:</p>
-                            <div className="bg-red-200 p-2 rounded flex items-center justify-between">
-                              <code className="text-sm font-mono text-red-900">https://whatsapp-google-connect-hub.lovable.app/conectar</code>
-                            </div>
-                            <a 
-                              href="https://console.cloud.google.com/apis/credentials" 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="mt-3 text-red-700 flex items-center gap-1 hover:underline text-sm"
-                            >
-                              Abrir Google Cloud Console <ExternalLink size={14} />
-                            </a>
-                          </div>
-                        )}
-                        {!isRedirectUriError && errorDetails && (
-                          <pre className="mt-2 p-2 bg-red-100 rounded text-xs overflow-auto max-h-40">
-                            {errorDetails}
-                          </pre>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <GoogleOAuthError 
+                    errorMessage={authError} 
+                    errorDetails={errorDetails} 
+                    isRedirectUriError={isRedirectUriError}
+                    configTimestamp={configTimestamp}
+                  />
                 )}
                 
                 <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg mb-6">
@@ -327,8 +324,18 @@ const Conectar = () => {
                   <p className="text-blue-800 text-sm mt-1">
                     <strong>Client ID:</strong> {GOOGLE_CLIENT_ID.substring(0, 12)}...
                   </p>
-                  <p className="text-blue-800 text-sm mt-1">
-                    <strong>URI de redirecionamento:</strong> https://whatsapp-google-connect-hub.lovable.app/conectar
+                  <p className="text-blue-800 text-sm mt-1 flex items-center justify-between">
+                    <span>
+                      <strong>URI de redirecionamento:</strong> https://whatsapp-google-connect-hub.lovable.app/conectar
+                    </span>
+                    <Button 
+                      onClick={openConfigHelp}
+                      variant="outline" 
+                      size="sm"
+                      className="ml-2 text-xs h-6 px-2"
+                    >
+                      Ver configuração
+                    </Button>
                   </p>
                 </div>
                 
@@ -451,6 +458,68 @@ const Conectar = () => {
           </div>
         </div>
       </section>
+      
+      <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Configuração do Google OAuth</DialogTitle>
+            <DialogDescription>
+              Para resolver o erro de redirect_uri_mismatch, verifique se estes URIs estão configurados exatamente como mostrados abaixo no seu Console do Google Cloud.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Origens JavaScript autorizadas</h3>
+              <div className="p-3 bg-gray-100 rounded border border-gray-300">
+                <p className="font-mono text-sm">https://whatsapp-google-connect-hub.lovable.app</p>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-2">URIs de redirecionamento autorizados</h3>
+              <div className="p-3 bg-gray-100 rounded border border-gray-300 space-y-2">
+                <div className="flex justify-between">
+                  <p className="font-mono text-sm">https://whatsapp-google-connect-hub.lovable.app/conectar</p>
+                  <span className="text-green-600 font-medium text-sm">✓ Obrigatório</span>
+                </div>
+                <div className="flex justify-between">
+                  <p className="font-mono text-sm">https://agentes-rioh-digital-n8n.sobntt.easypanel.host/rest/oauth2-credential/callback</p>
+                  <span className="text-gray-400 text-sm">Opcional</span>
+                </div>
+                <div className="flex justify-between">
+                  <p className="font-mono text-sm">https://uoeshejtkzngnqxtqtbl.supabase.co/functions/v1/auth-google-exchange</p>
+                  <span className="text-gray-400 text-sm">Opcional</span>
+                </div>
+                <div className="flex justify-between">
+                  <p className="font-mono text-sm">https://uoeshejtkzngnqxtqtbl.supabase.co/auth/v1/callback</p>
+                  <span className="text-gray-400 text-sm">Opcional</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-yellow-50 border border-yellow-300 rounded">
+              <h3 className="flex items-center gap-2 text-yellow-800 font-semibold">
+                <AlertCircle className="h-5 w-5" /> Importante
+              </h3>
+              <p className="text-yellow-700 mt-1">
+                Após salvar as alterações no Console Google Cloud, pode levar de 5 minutos a algumas horas para que as mudanças sejam propagadas. Tente novamente após esse período.
+              </p>
+            </div>
+            
+            <div className="flex justify-end">
+              <a 
+                href="https://console.cloud.google.com/apis/credentials" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                Abrir Google Cloud Console <ExternalLink size={16} />
+              </a>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

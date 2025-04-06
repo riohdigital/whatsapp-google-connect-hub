@@ -147,7 +147,8 @@ serve(async (req) => {
             message: "O URI de redirecionamento não corresponde ao configurado no Google Cloud Console.",
             details: {
               configured_uri: REDIRECT_URI,
-              suggestion: "Certifique-se que este URI exato esteja adicionado nas URIs de redirecionamento autorizadas no Console Google Cloud."
+              suggestion: "Certifique-se que este URI exato esteja adicionado nas URIs de redirecionamento autorizadas no Console Google Cloud.",
+              propagation_time: "As configurações do Google Cloud podem levar de 5 minutos a algumas horas para entrar em vigor."
             }
           }),
           {

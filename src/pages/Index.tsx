@@ -1,3 +1,4 @@
+
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { 
@@ -7,6 +8,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Clock } from "@/components/ui/clock-icon";
+import { RobotAssistant } from "@/components/ui/robot-assistant";
+import { FunctionIcon } from "@/components/ui/function-icon";
 
 const Index = () => {
   return (
@@ -15,14 +18,7 @@ const Index = () => {
       <section className="bg-gradient-to-b from-brand-blue/10 to-white py-12 md:py-16">
         <div className="container mx-auto px-6 md:px-12 text-center">
           <div className="flex items-center justify-center mb-6">
-            <div className="relative">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md">
-                <Bot className="w-10 h-10 text-brand-blue" />
-              </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-brand-red rounded-full flex items-center justify-center text-white font-bold">
-                <Zap className="w-4 h-4" />
-              </div>
-            </div>
+            <RobotAssistant size="md" tentacleCount={6} />
           </div>
           
           <h1 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in">
@@ -33,62 +29,70 @@ const Index = () => {
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-10">
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-brand-blue/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <BrainCircuit className="text-brand-blue w-6 h-6" />
-              </div>
-              <p className="font-medium">Sua Agenda</p>
-            </div>
+            <FunctionIcon 
+              icon={BrainCircuit} 
+              iconColor="text-brand-blue" 
+              tentacleColor="text-brand-blue/40"
+              tentacleDirection="up"
+              label="Sua Agenda"
+            />
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-brand-red/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Sparkles className="text-brand-red w-6 h-6" />
-              </div>
-              <p className="font-medium">Seus Emails</p>
-            </div>
+            <FunctionIcon 
+              icon={Sparkles} 
+              iconColor="text-brand-red" 
+              tentacleColor="text-brand-red/40"
+              tentacleDirection="right"
+              label="Seus Emails"
+            />
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-brand-yellow/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Bot className="text-brand-yellow w-6 h-6" />
-              </div>
-              <p className="font-medium">Seus Contatos</p>
-            </div>
+            <FunctionIcon 
+              icon={Bot} 
+              iconColor="text-brand-yellow" 
+              tentacleColor="text-brand-yellow/40"
+              tentacleDirection="left"
+              label="Seus Contatos"
+            />
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-brand-green/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Rocket className="text-brand-green w-6 h-6" />
-              </div>
-              <p className="font-medium">Criação de Textos</p>
-            </div>
+            <FunctionIcon 
+              icon={Rocket} 
+              iconColor="text-brand-green" 
+              tentacleColor="text-brand-green/40"
+              tentacleDirection="down"
+              label="Criação de Textos"
+            />
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Calculator className="text-purple-500 w-6 h-6" />
-              </div>
-              <p className="font-medium">Suas Finanças</p>
-              <span className="text-xs text-gray-500">Em breve</span>
-            </div>
+            <FunctionIcon 
+              icon={Calculator} 
+              iconColor="text-purple-500" 
+              tentacleColor="text-purple-500/40"
+              tentacleDirection="up"
+              label="Suas Finanças"
+              sublabel="Em breve"
+            />
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <CircuitBoard className="text-blue-500 w-6 h-6" />
-              </div>
-              <p className="font-medium">Mestre do Tempo</p>
-            </div>
+            <FunctionIcon 
+              icon={CircuitBoard} 
+              iconColor="text-blue-500" 
+              tentacleColor="text-blue-500/40"
+              tentacleDirection="right"
+              label="Mestre do Tempo"
+            />
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-cyan-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Laptop className="text-cyan-500 w-6 h-6" />
-              </div>
-              <p className="font-medium">Buscas na Web</p>
-            </div>
+            <FunctionIcon 
+              icon={Laptop} 
+              iconColor="text-cyan-500" 
+              tentacleColor="text-cyan-500/40"
+              tentacleDirection="left"
+              label="Buscas na Web"
+            />
             
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-amber-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Zap className="text-amber-500 w-6 h-6" />
-              </div>
-              <p className="font-medium">Cálculos Rápidos</p>
-            </div>
+            <FunctionIcon 
+              icon={Zap} 
+              iconColor="text-amber-500" 
+              tentacleColor="text-amber-500/40"
+              tentacleDirection="down"
+              label="Cálculos Rápidos"
+            />
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -134,9 +138,7 @@ const Index = () => {
                 
                 <div className="relative bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                   <div className="flex gap-4 items-center mb-6">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                      <MessageSquare className="text-white w-6 h-6" />
-                    </div>
+                    <RobotAssistant size="sm" tentacleCount={4} className="flex-shrink-0" />
                     <div>
                       <h3 className="font-bold">Assistente WhatsApp</h3>
                       <p className="text-sm text-gray-500">Conectado</p>
@@ -178,8 +180,11 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Por que conectar suas contas?</h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-              <div className="w-12 h-12 bg-brand-blue/10 rounded-lg flex items-center justify-center mb-4">
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 relative overflow-hidden">
+              <div className="absolute -bottom-4 -right-4 opacity-10">
+                <RobotTentacle direction="up" className="w-24 h-24 text-brand-blue" />
+              </div>
+              <div className="w-12 h-12 bg-brand-blue/10 rounded-lg flex items-center justify-center mb-4 relative">
                 <Mail className="text-brand-blue" />
               </div>
               <h3 className="text-xl font-bold mb-2">Acesso aos Emails</h3>
@@ -188,7 +193,10 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 relative overflow-hidden">
+              <div className="absolute -bottom-4 -right-4 opacity-10">
+                <RobotTentacle direction="left" className="w-24 h-24 text-brand-green" />
+              </div>
               <div className="w-12 h-12 bg-brand-green/10 rounded-lg flex items-center justify-center mb-4">
                 <Calendar className="text-brand-green" />
               </div>
@@ -198,7 +206,10 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 relative overflow-hidden">
+              <div className="absolute -bottom-4 -right-4 opacity-10">
+                <RobotTentacle direction="right" className="w-24 h-24 text-brand-yellow" />
+              </div>
               <div className="w-12 h-12 bg-brand-yellow/10 rounded-lg flex items-center justify-center mb-4">
                 <Lock className="text-brand-yellow" />
               </div>

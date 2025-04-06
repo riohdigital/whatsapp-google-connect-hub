@@ -1,28 +1,26 @@
-
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Lock, Mail, Calendar, AlertCircle, MessageSquare, Edit, DollarSign, Globe, Calculator, Users } from "lucide-react";
+import { 
+  ArrowRight, Lock, Mail, Calendar, AlertCircle, MessageSquare, 
+  Edit, DollarSign, Globe, Calculator, Users, Zap, Robot, 
+  BrainCircuit, Sparkles, Rocket, Bot, Laptop, CircuitBoard
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Clock } from "@/components/ui/clock-icon";
 
 const Index = () => {
   return (
     <Layout>
-      {/* Intro Section - Novo */}
+      {/* Intro Section - Novo e Mais Divertido */}
       <section className="bg-gradient-to-b from-brand-blue/10 to-white py-12 md:py-16">
         <div className="container mx-auto px-6 md:px-12 text-center">
           <div className="flex items-center justify-center mb-6">
             <div className="relative">
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md">
-                <div className="flex space-x-1">
-                  <div className="w-3 h-3 rounded-full bg-brand-blue"></div>
-                  <div className="w-3 h-3 rounded-full bg-brand-red"></div>
-                  <div className="w-3 h-3 rounded-full bg-brand-yellow"></div>
-                  <div className="w-3 h-3 rounded-full bg-brand-green"></div>
-                </div>
+                <Robot className="w-10 h-10 text-brand-blue" />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-brand-red rounded-full flex items-center justify-center text-white font-bold">
-                AI
+                <Zap className="w-4 h-4" />
               </div>
             </div>
           </div>
@@ -37,35 +35,35 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-10">
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-brand-blue/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Calendar className="text-brand-blue w-6 h-6" />
+                <BrainCircuit className="text-brand-blue w-6 h-6" />
               </div>
               <p className="font-medium">Sua Agenda</p>
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-brand-red/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Mail className="text-brand-red w-6 h-6" />
+                <Sparkles className="text-brand-red w-6 h-6" />
               </div>
               <p className="font-medium">Seus Emails</p>
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-brand-yellow/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Users className="text-brand-yellow w-6 h-6" />
+                <Bot className="text-brand-yellow w-6 h-6" />
               </div>
               <p className="font-medium">Seus Contatos</p>
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-brand-green/10 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Edit className="text-brand-green w-6 h-6" />
+                <Rocket className="text-brand-green w-6 h-6" />
               </div>
               <p className="font-medium">Criação de Textos</p>
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <DollarSign className="text-purple-500 w-6 h-6" />
+                <Calculator className="text-purple-500 w-6 h-6" />
               </div>
               <p className="font-medium">Suas Finanças</p>
               <span className="text-xs text-gray-500">Em breve</span>
@@ -73,21 +71,21 @@ const Index = () => {
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Clock className="text-blue-500 w-6 h-6" />
+                <CircuitBoard className="text-blue-500 w-6 h-6" />
               </div>
               <p className="font-medium">Mestre do Tempo</p>
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-cyan-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Globe className="text-cyan-500 w-6 h-6" />
+                <Laptop className="text-cyan-500 w-6 h-6" />
               </div>
               <p className="font-medium">Buscas na Web</p>
             </div>
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-amber-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <Calculator className="text-amber-500 w-6 h-6" />
+                <Zap className="text-amber-500 w-6 h-6" />
               </div>
               <p className="font-medium">Cálculos Rápidos</p>
             </div>

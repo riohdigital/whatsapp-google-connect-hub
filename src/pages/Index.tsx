@@ -1,7 +1,9 @@
+
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Lock, Mail, Calendar, AlertCircle, MessageSquare, Edit, DollarSign, Globe, Calculator, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Clock } from "@/components/ui/clock-icon";
 
 const Index = () => {
   return (

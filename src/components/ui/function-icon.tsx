@@ -9,7 +9,7 @@ interface FunctionIconProps extends React.HTMLAttributes<HTMLDivElement> {
   label?: string;
   sublabel?: string;
   connected?: boolean;
-  connectionPosition?: "top" | "right" | "bottom" | "left";
+  connectionPosition?: "top" | "right" | "bottom" | "left" | "top-right" | "top-left" | "bottom-right" | "bottom-left";
 }
 
 export const FunctionIcon = ({ 
@@ -32,11 +32,17 @@ export const FunctionIcon = ({
       case "top":
         return `${baseStyles} left-1/2 -translate-x-1/2 -top-[60px] h-[60px] w-0 border-l-2 border-r-0 border-b-0 border-t-0`;
       case "right":
-        return `${baseStyles} top-1/2 -translate-y-1/2 -right-[60px] w-[60px] h-0 border-t-0 border-b-0 border-l-0 border-r-0 border-t-2`;
+        return `${baseStyles} top-1/2 -translate-y-1/2 -right-[60px] w-[60px] h-0 border-t-2 border-b-0 border-l-0 border-r-0`;
       case "bottom":
         return `${baseStyles} left-1/2 -translate-x-1/2 -bottom-[60px] h-[60px] w-0 border-l-2 border-r-0 border-b-0 border-t-0`;
       case "left":
-        return `${baseStyles} top-1/2 -translate-y-1/2 -left-[60px] w-[60px] h-0 border-t-0 border-b-0 border-r-0 border-t-2`;
+        return `${baseStyles} top-1/2 -translate-y-1/2 -left-[60px] w-[60px] h-0 border-t-2 border-b-0 border-r-0 border-l-0`;
+      // Add diagonal connections but actually we'll handle them with SVG lines in the main component
+      case "top-right":
+      case "top-left":
+      case "bottom-right":
+      case "bottom-left":
+        return ""; // These are handled by the SVG in the parent component
       default:
         return "";
     }
@@ -45,7 +51,7 @@ export const FunctionIcon = ({
   return (
     <div className={cn("relative group", className)} {...props}>
       {/* Linha de conexão pontilhada */}
-      {connected && (
+      {connected && connectionPosition && !connectionPosition.includes("-") && (
         <div 
           className={cn(
             getConnectionStyles(), 

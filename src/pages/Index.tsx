@@ -26,7 +26,7 @@ const Index = () => {
           </p>
           
           {/* Área do robô central com ícones de função */}
-          <div className="relative h-[400px] mb-12 mx-auto">
+          <div className="relative h-[500px] mb-12 mx-auto">
             {/* Robô central flutuando */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <RobotAssistant size="lg" tentacleCount={8} className="animate-bounce-slow" />
@@ -44,7 +44,7 @@ const Index = () => {
                 iconColor="text-brand-blue" 
                 label="Sua Agenda"
                 connectionPosition="bottom"
-                className="absolute left-1/2 -translate-x-1/2 top-0"
+                className="absolute left-1/2 -translate-x-1/2 top-8"
               />
               
               {/* Top Right */}
@@ -52,8 +52,8 @@ const Index = () => {
                 icon={Sparkles} 
                 iconColor="text-brand-red" 
                 label="Seus Emails"
-                connectionPosition="bottom-left"
-                className="absolute right-1/4 top-[15%]"
+                connectionPosition="left"
+                className="absolute right-[15%] top-[15%]"
               />
               
               {/* Right */}
@@ -62,7 +62,7 @@ const Index = () => {
                 iconColor="text-brand-yellow" 
                 label="Seus Contatos"
                 connectionPosition="left"
-                className="absolute right-0 top-1/2 -translate-y-1/2"
+                className="absolute right-[8%] top-1/2 -translate-y-1/2"
               />
               
               {/* Bottom Right */}
@@ -70,8 +70,8 @@ const Index = () => {
                 icon={Rocket} 
                 iconColor="text-brand-green" 
                 label="Criação de Textos"
-                connectionPosition="top-left"
-                className="absolute right-1/4 bottom-[15%]"
+                connectionPosition="left"
+                className="absolute right-[15%] bottom-[15%]"
               />
               
               {/* Bottom */}
@@ -81,7 +81,7 @@ const Index = () => {
                 label="Suas Finanças"
                 sublabel="Em breve"
                 connectionPosition="top"
-                className="absolute left-1/2 -translate-x-1/2 bottom-0"
+                className="absolute left-1/2 -translate-x-1/2 bottom-8"
               />
               
               {/* Bottom Left */}
@@ -89,8 +89,8 @@ const Index = () => {
                 icon={CircuitBoard} 
                 iconColor="text-blue-500" 
                 label="Mestre do Tempo"
-                connectionPosition="top-right"
-                className="absolute left-1/4 bottom-[15%]"
+                connectionPosition="right"
+                className="absolute left-[15%] bottom-[15%]"
               />
               
               {/* Left */}
@@ -99,7 +99,7 @@ const Index = () => {
                 iconColor="text-cyan-500" 
                 label="Buscas na Web"
                 connectionPosition="right"
-                className="absolute left-0 top-1/2 -translate-y-1/2"
+                className="absolute left-[8%] top-1/2 -translate-y-1/2"
               />
               
               {/* Top Left */}
@@ -107,44 +107,80 @@ const Index = () => {
                 icon={Zap} 
                 iconColor="text-amber-500" 
                 label="Cálculos Rápidos"
-                connectionPosition="bottom-right"
-                className="absolute left-1/4 top-[15%]"
+                connectionPosition="right"
+                className="absolute left-[15%] top-[15%]"
               />
               
               {/* Linhas diagonais para conexões */}
               <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                {/* Linha Top-Right */}
+                {/* Centro para Top */}
                 <line 
                   x1="50%" y1="50%" 
-                  x2="75%" y2="15%" 
-                  stroke="#EA4335" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Linha Top-Left */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="25%" y2="15%" 
-                  stroke="#FBBC05" 
-                  strokeWidth="2" 
-                  strokeDasharray="6,6" 
-                />
-                
-                {/* Linha Bottom-Left */}
-                <line 
-                  x1="50%" y1="50%" 
-                  x2="25%" y2="85%" 
+                  x2="50%" y2="15%" 
                   stroke="#4285F4" 
                   strokeWidth="2" 
                   strokeDasharray="6,6" 
                 />
                 
-                {/* Linha Bottom-Right */}
+                {/* Centro para Top-Right */}
                 <line 
                   x1="50%" y1="50%" 
-                  x2="75%" y2="85%" 
+                  x2="85%" y2="15%" 
+                  stroke="#EA4335" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Centro para Right */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="92%" y2="50%" 
+                  stroke="#FBBC05" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Centro para Bottom-Right */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="85%" y2="85%" 
                   stroke="#34A853" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Centro para Bottom */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="50%" y2="85%" 
+                  stroke="#9C27B0" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Centro para Bottom-Left */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="15%" y2="85%" 
+                  stroke="#2196F3" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Centro para Left */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="8%" y2="50%" 
+                  stroke="#00BCD4" 
+                  strokeWidth="2" 
+                  strokeDasharray="6,6" 
+                />
+                
+                {/* Centro para Top-Left */}
+                <line 
+                  x1="50%" y1="50%" 
+                  x2="15%" y2="15%" 
+                  stroke="#FF9800" 
                   strokeWidth="2" 
                   strokeDasharray="6,6" 
                 />

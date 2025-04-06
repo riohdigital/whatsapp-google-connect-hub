@@ -19,8 +19,12 @@ serve(async (req) => {
   }
 
   try {
+    // Verificar se as credenciais estão configuradas
     if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
       console.error("Credenciais do Google não configuradas");
+      console.log(`Client ID disponível: ${GOOGLE_CLIENT_ID ? "Sim" : "Não"}`);
+      console.log(`Client Secret disponível: ${GOOGLE_CLIENT_SECRET ? "Sim" : "Não"}`);
+      
       return new Response(
         JSON.stringify({
           error: "Credenciais do Google não configuradas no servidor",
@@ -32,7 +36,23 @@ serve(async (req) => {
       );
     }
 
-    const { code } = await req.json();
+    // Obter o código de autorização da requisição
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log("Body da requisição recebido");
+    } catch (e) {
+      console.error("Erro ao parsear JSON do body:", e);
+      return new Response(
+        JSON.stringify({ error: "Body da requisição inválido" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    const { code } = requestBody;
     
     if (!code) {
       console.error("Código de autorização não fornecido");
@@ -46,32 +66,57 @@ serve(async (req) => {
     }
 
     console.log("Código recebido, trocando por tokens...");
+    console.log(`REDIRECT_URI: ${REDIRECT_URI}`);
     
-    // Troca o código por tokens de acesso e refresh
+    // Construir os parâmetros para a troca de código por tokens
+    const tokenParams = new URLSearchParams({
+      code,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: REDIRECT_URI,
+      grant_type: "authorization_code",
+    });
+
+    console.log("Parâmetros da requisição de token:", tokenParams.toString());
+
+    // Trocar o código por tokens de acesso e refresh
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: REDIRECT_URI,
-        grant_type: "authorization_code",
-      }),
+      body: tokenParams,
     });
 
-    const tokenData = await tokenResponse.json();
-    console.log("Resposta do token:", JSON.stringify(tokenData, null, 2));
+    const tokenResponseStatus = tokenResponse.status;
+    const tokenResponseText = await tokenResponse.text();
+    console.log(`Status da resposta de token: ${tokenResponseStatus}`);
+    console.log(`Resposta de token (texto): ${tokenResponseText}`);
+    
+    let tokenData;
+    try {
+      tokenData = JSON.parse(tokenResponseText);
+      console.log("Resposta do token parsada com sucesso");
+    } catch (e) {
+      console.error("Erro ao parsear resposta JSON de token:", e);
+      return new Response(
+        JSON.stringify({ 
+          error: "Resposta inválida da API do Google",
+          details: tokenResponseText
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     
     if (tokenData.error) {
-      console.error("Erro ao obter tokens:", tokenData.error_description || tokenData.error);
+      console.error("Erro retornado pela API do Google:", tokenData.error, tokenData.error_description);
       return new Response(
         JSON.stringify({
-          error: `Falha ao trocar o código por tokens: ${
-            tokenData.error_description || tokenData.error
-          }`,
+          error: `Falha ao trocar o código por tokens: ${tokenData.error_description || tokenData.error}`,
+          details: tokenData,
         }),
         {
           status: 400,
@@ -82,8 +127,9 @@ serve(async (req) => {
 
     // Extrair o token de acesso
     const { access_token, refresh_token, id_token } = tokenData;
+    console.log("Tokens obtidos com sucesso");
 
-    // Obter informações do usuário
+    // Obter informações do usuário com o token de acesso
     const userInfoResponse = await fetch(
       "https://www.googleapis.com/oauth2/v2/userinfo",
       {
@@ -93,8 +139,28 @@ serve(async (req) => {
       }
     );
 
-    const userInfo = await userInfoResponse.json();
-    console.log("Informações do usuário:", userInfo);
+    const userInfoStatus = userInfoResponse.status;
+    const userInfoText = await userInfoResponse.text();
+    console.log(`Status da resposta de userInfo: ${userInfoStatus}`);
+    console.log(`Resposta de userInfo (texto): ${userInfoText}`);
+    
+    let userInfo;
+    try {
+      userInfo = JSON.parse(userInfoText);
+      console.log("Informações do usuário obtidas com sucesso");
+    } catch (e) {
+      console.error("Erro ao parsear informações do usuário:", e);
+      return new Response(
+        JSON.stringify({
+          error: "Erro ao parsear informações do usuário",
+          details: userInfoText
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     
     if (userInfo.error) {
       console.error("Erro ao obter informações do usuário:", userInfo.error);
@@ -109,15 +175,15 @@ serve(async (req) => {
       );
     }
 
-    // Armazenar tokens e informações do usuário no Supabase ou no banco de dados
-    // Implementar conforme necessário
-
+    // Retornar informações do usuário e tokens para o cliente
     return new Response(
       JSON.stringify({
         success: true,
         email: userInfo.email,
         name: userInfo.name,
         picture: userInfo.picture,
+        accessToken: access_token,
+        refreshToken: refresh_token
       }),
       {
         status: 200,
@@ -125,10 +191,11 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Erro na função auth-google-exchange:", error);
+    console.error("Erro não tratado na função auth-google-exchange:", error);
     return new Response(
       JSON.stringify({
         error: `Erro interno do servidor: ${error.message}`,
+        stack: error.stack
       }),
       {
         status: 500,

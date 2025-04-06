@@ -14,6 +14,11 @@ export const initGoogleOAuthClient = ({
   scopes,
   callbackFunction,
 }: GoogleOAuthConfig) => {
+  if (!(window as any).google?.accounts?.oauth2) {
+    console.error("Biblioteca do Google OAuth não carregada corretamente");
+    throw new Error("Biblioteca do Google OAuth não está disponível");
+  }
+  
   return (window as any).google.accounts.oauth2.initCodeClient({
     client_id: clientId,
     scope: scopes.join(' '),
@@ -30,6 +35,12 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
   try {
     console.log(`Enviando código para: ${edgeFunctionUrl}`);
     console.log(`Tamanho do código: ${code.length} caracteres`);
+    console.log(`Primeiros caracteres do código: ${code.substring(0, 10)}...`);
+    
+    // Verificar se a URL da função é válida
+    if (!edgeFunctionUrl.startsWith('http')) {
+      throw new Error(`URL da função inválida: ${edgeFunctionUrl}`);
+    }
     
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
@@ -52,7 +63,8 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
     }
 
     if (!response.ok) {
-      throw new Error(data.error || `Falha na autenticação (${response.status}): ${responseText}`);
+      console.error("Resposta não-OK do servidor:", data);
+      throw new Error(data.error || `Falha na autenticação (${response.status}): ${JSON.stringify(data)}`);
     }
 
     return data;

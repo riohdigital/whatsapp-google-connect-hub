@@ -1,4 +1,3 @@
-
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { 
@@ -10,6 +9,7 @@ import { Link } from "react-router-dom";
 import { Clock } from "@/components/ui/clock-icon";
 import { RobotAssistant } from "@/components/ui/robot-assistant";
 import { FunctionIcon } from "@/components/ui/function-icon";
+import { RobotTentacle } from "@/components/ui/robot-tentacle";
 
 const Index = () => {
   return (

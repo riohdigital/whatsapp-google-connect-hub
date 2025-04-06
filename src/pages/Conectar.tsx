@@ -2,30 +2,99 @@
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Calendar, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { Mail, Calendar, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { initGoogleOAuthClient, sendCodeToBackend } from "@/utils/googleAuth";
 
 const Conectar = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [n8nWebhookUrl, setN8nWebhookUrl] = useState("");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   
-  // No ambiente real, isso seria substituído pela integração com o Google OAuth
+  // Google OAuth Configuration
+  const googleClientId = "YOUR_GOOGLE_CLIENT_ID"; // Deve ser substituído pelo ID real
+  const googleScopes = [
+    "email", 
+    "profile", 
+    "https://mail.google.com/", 
+    "https://www.googleapis.com/auth/calendar.events"
+  ];
+  const edgeFunctionUrl = "YOUR_SUPABASE_EDGE_FUNCTION_URL"; // URL da Edge Function no Supabase
+  
+  // Carregar o script do Google Identity Services
+  useEffect(() => {
+    const loadGoogleScript = () => {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => console.log("Google Identity Services carregado");
+      document.body.appendChild(script);
+    };
+
+    loadGoogleScript();
+  }, []);
+
   const handleGoogleAuth = () => {
     setIsLoading(true);
     
-    // Simulando o processo de autenticação
-    setTimeout(() => {
-      setIsAuthorized(true);
+    // Verificar se a biblioteca do Google foi carregada
+    if (!(window as any).google?.accounts?.oauth2) {
+      toast({
+        title: "Erro ao carregar Google OAuth",
+        description: "Por favor, recarregue a página e tente novamente.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    const handleOAuthResponse = async (response: { code: string }) => {
+      try {
+        // Enviar o código para o backend (Supabase Edge Function)
+        const result = await sendCodeToBackend(response.code, edgeFunctionUrl);
+        
+        setIsAuthorized(true);
+        setUserEmail(result.email || "seu-email@gmail.com");
+        
+        toast({
+          title: "Autenticação realizada",
+          description: `Sua conta Google (${result.email}) foi conectada com sucesso!`,
+        });
+      } catch (error) {
+        console.error("Erro durante autenticação:", error);
+        toast({
+          title: "Falha na autenticação",
+          description: error instanceof Error ? error.message : "Ocorreu um erro desconhecido",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    try {
+      const client = initGoogleOAuthClient({
+        clientId: googleClientId,
+        scopes: googleScopes,
+        callbackFunction: handleOAuthResponse,
+      });
+      
+      // Iniciar o fluxo de autenticação
+      client.requestCode();
+    } catch (error) {
+      console.error("Erro ao iniciar autenticação:", error);
       setIsLoading(false);
       
       toast({
-        title: "Autenticação realizada",
-        description: "Sua conta Google foi conectada com sucesso!",
+        title: "Erro na inicialização",
+        description: "Não foi possível iniciar o processo de autenticação Google.",
+        variant: "destructive",
       });
-    }, 2000);
+    }
   };
   
   const handleConfigureWebhook = () => {
@@ -40,15 +109,39 @@ const Conectar = () => {
     
     setIsLoading(true);
     
-    // Simulando o envio para o webhook
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      toast({
-        title: "Credenciais enviadas",
-        description: "As credenciais foram enviadas com sucesso para o n8n!",
+    // Enviar credenciais para o webhook do n8n
+    // Em produção, isso seria feito de forma segura através do backend
+    fetch(n8nWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: userEmail,
+        status: "connected",
+        // Não incluímos tokens aqui - em produção eles seriam enviados pelo backend
+      }),
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Falha ao enviar para webhook");
+        return response.json();
+      })
+      .then(() => {
+        toast({
+          title: "Credenciais enviadas",
+          description: "As credenciais foram enviadas com sucesso para o n8n!",
+        });
+      })
+      .catch(error => {
+        toast({
+          title: "Erro ao enviar credenciais",
+          description: error.message,
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-    }, 1500);
   };
 
   return (
@@ -106,7 +199,14 @@ const Conectar = () => {
                       <div className="w-4 h-4 rounded-full bg-brand-green"></div>
                     </div>
                     <span>
-                      {isLoading ? "Autorizando..." : "Autorizar com Google"}
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Autorizando...
+                        </>
+                      ) : (
+                        "Autorizar com Google"
+                      )}
                     </span>
                   </Button>
                 ) : (
@@ -115,7 +215,9 @@ const Conectar = () => {
                       <CheckCircle2 className="text-green-600" />
                       <div>
                         <p className="font-medium text-green-800">Conta Google conectada</p>
-                        <p className="text-green-700 text-sm">Sua autenticação foi concluída com sucesso</p>
+                        <p className="text-green-700 text-sm">
+                          {userEmail ? `${userEmail} autenticado com sucesso` : 'Sua autenticação foi concluída com sucesso'}
+                        </p>
                       </div>
                     </div>
                     
@@ -144,13 +246,21 @@ const Conectar = () => {
                         disabled={isLoading || !n8nWebhookUrl}
                         className="w-full"
                       >
-                        {isLoading ? "Enviando credenciais..." : "Enviar credenciais para n8n"}
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Enviando credenciais...
+                          </>
+                        ) : (
+                          "Enviar credenciais para n8n"
+                        )}
                       </Button>
                       
                       <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
                         <AlertCircle className="text-yellow-600 w-5 h-5 shrink-0" />
                         <p className="text-yellow-700">
                           Em um ambiente de produção, este passo seria automatizado e seguro, sem expor a URL do webhook.
+                          As credenciais reais são armazenadas no Supabase.
                         </p>
                       </div>
                     </div>

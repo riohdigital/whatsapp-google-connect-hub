@@ -46,10 +46,10 @@ const AuthCallback = () => {
             title: "Autenticação realizada",
             description: "Login realizado com sucesso!",
           });
-          // Use um pequeno atraso para garantir que o redirecionamento funcione
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 100);
+          
+          // Usar window.location.href para redirecionamento forte em vez de navigate
+          console.log("Redirecionando para /dashboard");
+          window.location.href = `${window.location.origin}/dashboard`;
         } else {
           // If no session (rare), redirect to auth page
           console.error("Nenhuma sessão encontrada no callback");

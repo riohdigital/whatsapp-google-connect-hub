@@ -84,20 +84,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Iniciando login com Google");
       
-      // Obter URL atual para callback
-      const currentUrl = window.location.origin;
-      console.log("URL de origem para callback:", currentUrl);
+      // Obter URL atual para callback - usando URL completa do site
+      const siteUrl = window.location.origin;
+      console.log("URL base do site:", siteUrl);
       
-      // Configurar URL de callback específica e garantir que ela esteja completa
-      const callbackUrl = `${currentUrl}/auth/callback`;
+      // Usar a URL com referência absoluta para o callback
+      const callbackUrl = `${siteUrl}/auth/callback`;
       console.log("URL completa para callback:", callbackUrl);
       
-      // Certificar que estamos usando o método PKCE para OAuth
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: callbackUrl,
-          skipBrowserRedirect: false, // Garante que o navegador será redirecionado
+          skipBrowserRedirect: false,
         },
       });
       
@@ -108,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       console.log("Google auth iniciada, URL:", data?.url);
       
-      // Se o URL for fornecido, redirecione manualmente para garantir
+      // Redirecionamento explícito para garantir que vamos para a página certa
       if (data?.url) {
         console.log("Redirecionando para:", data.url);
         window.location.href = data.url;

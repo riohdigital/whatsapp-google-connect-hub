@@ -84,14 +84,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Iniciando login com Google");
       
-      // Get current site URL for callback
-      const siteUrl = window.location.origin;
-      console.log("Site URL for callback:", siteUrl);
+      // Obter URL atual para callback
+      const currentUrl = window.location.origin;
+      console.log("URL de origem para callback:", currentUrl);
+      
+      // Configurar URL de callback específica
+      const callbackUrl = `${currentUrl}/auth/callback`;
+      console.log("URL completa para callback:", callbackUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${siteUrl}/auth/callback`,
+          redirectTo: callbackUrl,
         },
       });
       
@@ -102,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       console.log("Google auth iniciada, URL:", data?.url);
       
-      // No need to navigate here - the OAuth flow will handle redirection
+      // O fluxo OAuth do Google fará o redirecionamento
     } catch (error: any) {
       console.error("Erro detalhado:", error);
       toast({
@@ -115,13 +119,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
-      const siteUrl = window.location.origin;
+      // Obter URL atual para callback
+      const currentUrl = window.location.origin;
+      const callbackUrl = `${currentUrl}/auth/callback`;
       
       const { error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
-          emailRedirectTo: `${siteUrl}/auth/callback`,
+          emailRedirectTo: callbackUrl,
         }
       });
       if (error) throw error;

@@ -11,14 +11,18 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // Log para depuração
+        console.log("Processando callback de autenticação...");
+        console.log("URL atual:", window.location.href);
+        
         // Process the OAuth callback
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error processing auth callback:', error);
+          console.error('Erro ao processar callback de autenticação:', error);
           toast({
             title: "Erro na autenticação",
-            description: "Ocorreu um erro durante o processo de autenticação.",
+            description: "Ocorreu um erro durante o processo de autenticação: " + error.message,
             variant: "destructive",
           });
           navigate('/auth');
@@ -26,7 +30,7 @@ const AuthCallback = () => {
         }
         
         // Log session data for debugging
-        console.log("Auth callback session data:", data);
+        console.log("Dados da sessão de autenticação:", data);
         
         // If we have a session, redirect to dashboard
         if (data.session) {
@@ -45,7 +49,7 @@ const AuthCallback = () => {
           navigate('/auth');
         }
       } catch (error) {
-        console.error('Error processing auth callback:', error);
+        console.error('Erro inesperado no callback de autenticação:', error);
         toast({
           title: "Erro inesperado",
           description: "Ocorreu um erro inesperado durante o processo de autenticação.",

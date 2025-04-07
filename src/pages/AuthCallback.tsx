@@ -15,6 +15,13 @@ const AuthCallback = () => {
         console.log("Processando callback de autenticação...");
         console.log("URL atual:", window.location.href);
         
+        // Verificar se há código ou token na URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const queryParams = new URLSearchParams(window.location.search);
+        
+        console.log("Hash params:", Object.fromEntries([...hashParams.entries()]));
+        console.log("Query params:", Object.fromEntries([...queryParams.entries()]));
+        
         // Process the OAuth callback
         const { data, error } = await supabase.auth.getSession();
         
@@ -34,13 +41,18 @@ const AuthCallback = () => {
         
         // If we have a session, redirect to dashboard
         if (data.session) {
+          console.log("Sessão válida encontrada, redirecionando para dashboard");
           toast({
             title: "Autenticação realizada",
             description: "Login realizado com sucesso!",
           });
-          navigate('/dashboard');
+          // Use um pequeno atraso para garantir que o redirecionamento funcione
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 100);
         } else {
           // If no session (rare), redirect to auth page
+          console.error("Nenhuma sessão encontrada no callback");
           toast({
             title: "Falha na autenticação",
             description: "Não foi possível criar uma sessão. Por favor, tente novamente.",

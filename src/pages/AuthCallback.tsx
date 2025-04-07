@@ -2,9 +2,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -12,23 +14,49 @@ const AuthCallback = () => {
         // Process the OAuth callback
         const { data, error } = await supabase.auth.getSession();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error processing auth callback:', error);
+          toast({
+            title: "Erro na autenticação",
+            description: "Ocorreu um erro durante o processo de autenticação.",
+            variant: "destructive",
+          });
+          navigate('/auth');
+          return;
+        }
+        
+        // Log session data for debugging
+        console.log("Auth callback session data:", data);
         
         // If we have a session, redirect to dashboard
         if (data.session) {
+          toast({
+            title: "Autenticação realizada",
+            description: "Login realizado com sucesso!",
+          });
           navigate('/dashboard');
         } else {
           // If no session (rare), redirect to auth page
+          toast({
+            title: "Falha na autenticação",
+            description: "Não foi possível criar uma sessão. Por favor, tente novamente.",
+            variant: "destructive",
+          });
           navigate('/auth');
         }
       } catch (error) {
         console.error('Error processing auth callback:', error);
+        toast({
+          title: "Erro inesperado",
+          description: "Ocorreu um erro inesperado durante o processo de autenticação.",
+          variant: "destructive",
+        });
         navigate('/auth');
       }
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

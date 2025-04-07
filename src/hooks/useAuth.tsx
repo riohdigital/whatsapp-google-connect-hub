@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.email);
         if (session?.user) {
           // Get user profile with role
           const { data: profile } = await supabase
@@ -81,14 +82,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log("Iniciando login com Google");
+      
+      // Get current site URL for callback
+      const siteUrl = window.location.origin;
+      console.log("Site URL for callback:", siteUrl);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${siteUrl}/auth/callback`,
         },
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Erro no login com Google:", error);
+        throw error;
+      }
+      
+      console.log("Google auth iniciada, URL:", data?.url);
+      
+      // No need to navigate here - the OAuth flow will handle redirection
     } catch (error: any) {
+      console.error("Erro detalhado:", error);
       toast({
         variant: 'destructive',
         title: 'Erro ao entrar com Google',
@@ -99,11 +115,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
+      const siteUrl = window.location.origin;
+      
       const { error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${siteUrl}/auth/callback`,
         }
       });
       if (error) throw error;

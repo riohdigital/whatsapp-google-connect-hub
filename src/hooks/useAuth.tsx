@@ -37,10 +37,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // para prevenir problemas de deadlock com Supabase
         if (session?.user) {
           // Atualização síncrona básica primeiro
-          const basicUser = {
+          const basicUser: User = {
             id: session.user.id,
             email: session.user.email!,
-            role: 'user', // Default role
+            role: 'user', // Default role as a valid union type
           };
           setUser(basicUser);
           setLoading(false);
@@ -66,7 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
           
         if (profile) {
-          setUser(prev => prev ? {...prev, role: profile.role || 'user'} : null);
+          // Ensure the role is of the correct type
+          const userRole = profile.role === 'admin' ? 'admin' : 'user';
+          
+          setUser(prev => prev ? {...prev, role: userRole} : null);
         }
       } catch (error) {
         console.error("Erro ao buscar perfil do usuário:", error);

@@ -58,13 +58,14 @@ const AuthCallback = () => {
             );
           }
           
-          // Redireccionar para o dashboard usando window.location.replace()
-          // em vez do navigate() para evitar problemas de estado
-          const baseUrl = window.location.origin;
-          const dashboardUrl = `${baseUrl}/dashboard`;
+          // Forçar uma pequena pausa antes de redirecionar para garantir que os eventos de autenticação sejam processados
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
-          console.log("Redirecionando para:", dashboardUrl);
-          window.location.replace(dashboardUrl);
+          console.log("Redirecionando para o dashboard após pausa deliberada");
+          
+          // Redireccionar para o dashboard usando window.location.href
+          // em vez do navigate() ou replace() para garantir um refresh completo
+          window.location.href = "/dashboard";
         } else {
           // If no session (rare), redirect to auth page
           console.error("Nenhuma sessão encontrada no callback");
@@ -92,7 +93,7 @@ const AuthCallback = () => {
     // para garantir que o contexto do navegador esteja pronto
     const timeoutId = setTimeout(() => {
       handleAuthCallback();
-    }, 100);
+    }, 300); // Aumentando para 300ms para dar mais tempo para o token ser processado
 
     return () => clearTimeout(timeoutId);
   }, [navigate, toast]);
@@ -103,6 +104,7 @@ const AuthCallback = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-blue mx-auto mb-4"></div>
         <h1 className="text-xl font-semibold">Autenticando...</h1>
         <p className="text-gray-500 mt-2">Por favor, aguarde enquanto processamos seu login.</p>
+        <p className="text-gray-400 text-sm mt-4">Se a página não redirecionar em alguns segundos, <button onClick={() => window.location.href = "/dashboard"} className="text-blue-500 underline">clique aqui</button>.</p>
       </div>
     </div>
   );

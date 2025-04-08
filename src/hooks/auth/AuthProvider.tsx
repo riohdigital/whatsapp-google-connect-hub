@@ -4,11 +4,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from '@/hooks/use-toast';
 import { AuthContext } from './AuthContext';
-import { User } from './auth.types';
+import { User, UserPlan } from './auth.types';
 import { AuthError } from '@supabase/supabase-js';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [googleConnected, setGoogleConnected] = useState(false);
   const navigate = useNavigate();
@@ -17,6 +18,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check if the current path is within the dashboard
   const isDashboardPath = location.pathname.startsWith('/dashboard');
+
+  const fetchUserPlan = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_plans')
+        .select('plan_name, expires_at')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching user plan:", error);
+        return;
+      }
+      
+      if (data) {
+        setUserPlan({
+          planName: data.plan_name,
+          expiresAt: data.expires_at ? new Date(data.expires_at) : null
+        });
+      }
+    } catch (error) {
+      console.error("Error in fetchUserPlan:", error);
+    }
+  };
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching user profile:", error);
+        return;
+      }
+      
+      if (data) {
+        setUser(prevUser => prevUser ? {
+          ...prevUser,
+          firstName: data.first_name || undefined,
+          lastName: data.last_name || undefined
+        } : null);
+      }
+    } catch (error) {
+      console.error("Error in fetchUserProfile:", error);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -46,8 +96,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: session.user.email!,
             role: profile?.role || 'user',
           });
+          
+          // Fetch additional user data in separate functions
+          fetchUserPlan(session.user.id);
+          fetchUserProfile(session.user.id);
         } else {
           setUser(null);
+          setUserPlan(null);
           setGoogleConnected(false);
           
           // Only redirect to home if we're on a protected route and there's no session
@@ -179,16 +234,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateProfile = async (firstName: string, lastName: string) => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao atualizar perfil',
+        description: 'Você precisa estar logado para atualizar seu perfil.',
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Update local user state
+      setUser({
+        ...user,
+        firstName,
+        lastName,
+      });
+
+      toast({
+        title: 'Perfil atualizado',
+        description: 'Seus dados foram atualizados com sucesso.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao atualizar perfil',
+        description: error.message || 'Ocorreu um erro ao atualizar seu perfil.',
+      });
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Senha atualizada',
+        description: 'Sua senha foi atualizada com sucesso.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao atualizar senha',
+        description: error.message || 'Ocorreu um erro ao atualizar sua senha.',
+      });
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
+      userPlan,
       loading, 
       googleConnected,
       signIn, 
       signInWithGoogle, 
       connectGoogle,
       signUp, 
-      signOut 
+      signOut,
+      updateProfile,
+      updatePassword
     }}>
       {children}
     </AuthContext.Provider>

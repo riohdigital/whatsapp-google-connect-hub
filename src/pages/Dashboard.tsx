@@ -1,3 +1,4 @@
+
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,15 +11,19 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
+import ProfileForm from "@/components/ProfileForm";
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const { user, googleConnected, connectGoogle } = useAuth();
+  const { user, userPlan, googleConnected, connectGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
   const isAdmin = user?.role === 'admin';
-  const userPlan = "Básico"; // Placeholder - should come from user data
+  const planName = userPlan?.planName || "Básico";
+  const planExpiry = userPlan?.expiresAt 
+    ? new Intl.DateTimeFormat('pt-BR').format(userPlan.expiresAt)
+    : "06/05/2025";
   
   const handleRefreshToken = () => {
     setIsLoading(true);
@@ -109,8 +114,8 @@ const Dashboard = () => {
                   <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
                     <Info className="text-blue-600" />
                     <div>
-                      <p className="font-medium text-blue-800">Plano: {userPlan}</p>
-                      <p className="text-blue-700 text-sm">Válido até: 06/05/2025</p>
+                      <p className="font-medium text-blue-800">Plano: {planName}</p>
+                      <p className="text-blue-700 text-sm">Válido até: {planExpiry}</p>
                       <Button 
                         variant="link" 
                         className="text-blue-700 p-0 h-auto text-sm"
@@ -149,20 +154,6 @@ const Dashboard = () => {
                             <XCircle size={14} /> Desconectado
                           </span>
                         )}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">Webhook</span>
-                      <span className="text-sm font-medium text-green-600 flex items-center gap-1">
-                        <CheckCircle size={14} /> Configurado
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">WhatsApp</span>
-                      <span className="text-sm font-medium text-green-600 flex items-center gap-1">
-                        <CheckCircle size={14} /> Conectado
                       </span>
                     </div>
                   </div>
@@ -228,6 +219,7 @@ const Dashboard = () => {
               <Tabs defaultValue="overview">
                 <TabsList className="mb-6">
                   <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+                  <TabsTrigger value="profile">Perfil</TabsTrigger>
                   <TabsTrigger value="permissions">Permissões</TabsTrigger>
                   <TabsTrigger value="logs">Logs</TabsTrigger>
                   {isAdmin && (
@@ -381,12 +373,16 @@ const Dashboard = () => {
                           </Button>
                           
                           <Button variant="outline" asChild>
-                            <a href="/como-funciona">Ver exemplos de comandos</a>
+                            <Link to="/como-funciona">Ver exemplos de comandos</Link>
                           </Button>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
+                </TabsContent>
+                
+                <TabsContent value="profile">
+                  <ProfileForm />
                 </TabsContent>
                 
                 <TabsContent value="permissions">

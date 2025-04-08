@@ -34,17 +34,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Auth state changed:", event, session?.user?.email);
         if (session?.user) {
           // Get user profile with role
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', session.user.id)
+              .single();
 
-          setUser({
-            id: session.user.id,
-            email: session.user.email!,
-            role: profile?.role || 'user',
-          });
+            setUser({
+              id: session.user.id,
+              email: session.user.email!,
+              role: profile?.role || 'user',
+            });
+          } catch (error) {
+            console.error("Erro ao buscar perfil do usuário:", error);
+            // Mesmo sem perfil, configurar usuário básico
+            setUser({
+              id: session.user.id,
+              email: session.user.email!,
+              role: 'user',
+            });
+          }
         } else {
           setUser(null);
         }
@@ -55,8 +65,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        console.log("Sessão inicial encontrada:", session.user.email);
         // This will be handled by onAuthStateChange
       } else {
+        console.log("Nenhuma sessão inicial encontrada");
         setLoading(false);
       }
     });

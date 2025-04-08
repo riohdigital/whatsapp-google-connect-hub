@@ -47,9 +47,8 @@ const AuthCallback = () => {
             description: "Login realizado com sucesso!",
           });
           
-          // Usar window.location.href para redirecionamento forte em vez de navigate
-          console.log("Redirecionando para /dashboard");
-          window.location.href = `${window.location.origin}/dashboard`;
+          // Técnica de redirecionamento mais forte - substitui a página atual
+          window.location.replace(`${window.location.origin}/dashboard`);
         } else {
           // If no session (rare), redirect to auth page
           console.error("Nenhuma sessão encontrada no callback");
@@ -71,7 +70,12 @@ const AuthCallback = () => {
       }
     };
 
-    handleAuthCallback();
+    // Pequeno atraso para garantir que todas as operações de autenticação terminem
+    const timeoutId = setTimeout(() => {
+      handleAuthCallback();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [navigate, toast]);
 
   return (

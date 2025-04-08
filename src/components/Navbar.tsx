@@ -1,16 +1,28 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth"; 
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const location = useLocation();
+  
+  // Close the menu when changing routes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Handle signout
+  const handleSignOut = (e: React.MouseEvent) => {
+    e.preventDefault();
+    signOut();
   };
 
   return (
@@ -34,15 +46,17 @@ const Navbar = () => {
           <Link to="/como-funciona" className="text-gray-700 hover:text-gray-900 font-medium">
             Como Funciona
           </Link>
-          <Link to="/planos" className="text-gray-700 hover:text-gray-900 font-medium">
-            Planos
-          </Link>
+          {!user && (
+            <Link to="/planos" className="text-gray-700 hover:text-gray-900 font-medium">
+              Planos
+            </Link>
+          )}
           {user ? (
             <>
               <Link to="/dashboard" className="text-gray-700 hover:text-gray-900 font-medium">
                 Dashboard
               </Link>
-              <Button variant="outline" onClick={signOut}>
+              <Button variant="outline" onClick={handleSignOut}>
                 Sair
               </Button>
             </>
@@ -68,39 +82,37 @@ const Navbar = () => {
             <Link 
               to="/" 
               className="text-gray-700 hover:text-gray-900 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
             >
               Início
             </Link>
             <Link 
               to="/como-funciona" 
               className="text-gray-700 hover:text-gray-900 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
             >
               Como Funciona
             </Link>
-            <Link 
-              to="/planos" 
-              className="text-gray-700 hover:text-gray-900 font-medium py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Planos
-            </Link>
+            {!user && (
+              <Link 
+                to="/planos" 
+                className="text-gray-700 hover:text-gray-900 font-medium py-2"
+              >
+                Planos
+              </Link>
+            )}
             {user ? (
               <>
                 <Link 
                   to="/dashboard" 
                   className="text-gray-700 hover:text-gray-900 font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
-                <Button variant="outline" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                <Button variant="outline" onClick={handleSignOut}>
                   Sair
                 </Button>
               </>
             ) : (
-              <Button variant="default" asChild onClick={() => setIsMenuOpen(false)}>
+              <Button variant="default" asChild>
                 <Link to="/auth">Entrar</Link>
               </Button>
             )}

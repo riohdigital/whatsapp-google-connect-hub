@@ -1,4 +1,3 @@
-
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,14 +9,16 @@ import {
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { Link, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, googleConnected, connectGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   
   const isAdmin = user?.role === 'admin';
-  const userPlan = "Pro"; // Placeholder - should come from user data
+  const userPlan = "Básico"; // Placeholder - should come from user data
   
   const handleRefreshToken = () => {
     setIsLoading(true);
@@ -38,6 +39,10 @@ const Dashboard = () => {
       description: "Para reconectar sua conta, visite a página 'Conectar'.",
       variant: "destructive",
     });
+  };
+
+  const handleConnectGoogle = () => {
+    connectGoogle();
   };
 
   return (
@@ -68,8 +73,36 @@ const Dashboard = () => {
                     <CheckCircle className="text-green-600" />
                     <div>
                       <p className="font-medium text-green-800">Conta conectada</p>
-                      <p className="text-green-700 text-sm">Google OAuth ativo</p>
+                      <p className="text-green-700 text-sm">Login ativo</p>
                     </div>
+                  </div>
+                  
+                  {/* Status da conexão Google */}
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                    {googleConnected ? (
+                      <>
+                        <CheckCircle className="text-green-600" />
+                        <div>
+                          <p className="font-medium text-green-800">Google conectado</p>
+                          <p className="text-green-700 text-sm">OAuth funcionando</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="text-red-600" />
+                        <div>
+                          <p className="font-medium text-red-800">Google não conectado</p>
+                          <p className="text-red-700 text-sm">OAuth não autorizado</p>
+                          <Button 
+                            variant="link" 
+                            className="text-blue-700 p-0 h-auto text-sm"
+                            onClick={handleConnectGoogle}
+                          >
+                            Conectar Google
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </div>
                   
                   {/* Plano atual do usuário */}
@@ -81,9 +114,9 @@ const Dashboard = () => {
                       <Button 
                         variant="link" 
                         className="text-blue-700 p-0 h-auto text-sm"
-                        asChild
+                        onClick={() => navigate('/dashboard/planos')}
                       >
-                        <a href="/planos">Alterar plano</a>
+                        Alterar plano
                       </Button>
                     </div>
                   </div>
@@ -91,15 +124,31 @@ const Dashboard = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-500">Gmail</span>
-                      <span className="text-sm font-medium text-green-600 flex items-center gap-1">
-                        <CheckCircle size={14} /> Ativo
+                      <span className="text-sm font-medium flex items-center gap-1">
+                        {googleConnected ? (
+                          <span className="text-green-600 flex items-center gap-1">
+                            <CheckCircle size={14} /> Ativo
+                          </span>
+                        ) : (
+                          <span className="text-red-600 flex items-center gap-1">
+                            <XCircle size={14} /> Desconectado
+                          </span>
+                        )}
                       </span>
                     </div>
                     
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-500">Google Calendar</span>
-                      <span className="text-sm font-medium text-green-600 flex items-center gap-1">
-                        <CheckCircle size={14} /> Ativo
+                      <span className="text-sm font-medium flex items-center gap-1">
+                        {googleConnected ? (
+                          <span className="text-green-600 flex items-center gap-1">
+                            <CheckCircle size={14} /> Ativo
+                          </span>
+                        ) : (
+                          <span className="text-red-600 flex items-center gap-1">
+                            <XCircle size={14} /> Desconectado
+                          </span>
+                        )}
                       </span>
                     </div>
                     
@@ -131,7 +180,7 @@ const Dashboard = () => {
                       variant="outline" 
                       className="w-full justify-start" 
                       onClick={handleRefreshToken}
-                      disabled={isLoading}
+                      disabled={isLoading || !googleConnected}
                     >
                       <RefreshCw className="mr-2 h-4 w-4" />
                       {isLoading ? "Atualizando..." : "Atualizar Token"}
@@ -146,10 +195,22 @@ const Dashboard = () => {
                       variant="outline" 
                       className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                       onClick={handleRevokeAccess}
+                      disabled={!googleConnected}
                     >
                       <XCircle className="mr-2 h-4 w-4" />
                       Revogar Acesso
                     </Button>
+                    
+                    {!googleConnected && (
+                      <Button 
+                        variant="default" 
+                        className="w-full justify-start"
+                        onClick={handleConnectGoogle}
+                      >
+                        <Mail className="mr-2 h-4 w-4" />
+                        Conectar Google
+                      </Button>
+                    )}
                     
                     <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm mt-4">
                       <Info className="text-yellow-600 shrink-0" size={16} />
@@ -184,26 +245,37 @@ const Dashboard = () => {
                       <div className="space-y-6">
                         <div>
                           <h3 className="text-lg font-medium mb-4">Conta Google</h3>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-500">Email</p>
-                              <p>{user?.email || "usuario@gmail.com"}</p>
+                          {googleConnected ? (
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <p className="text-sm text-gray-500">Email</p>
+                                <p>{user?.email || "usuario@gmail.com"}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm text-gray-500">Status da Autorização</p>
+                                <p className="flex items-center gap-2 text-green-600">
+                                  <CheckCircle size={16} /> Autorizado
+                                </p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm text-gray-500">Data de Conexão</p>
+                                <p>05/04/2025</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm text-gray-500">Expiração do Token</p>
+                                <p>05/04/2026</p>
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-500">Status da Autorização</p>
-                              <p className="flex items-center gap-2 text-green-600">
-                                <CheckCircle size={16} /> Autorizado
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                              <p className="text-gray-600 mb-4">
+                                Você ainda não conectou sua conta Google.
                               </p>
+                              <Button onClick={handleConnectGoogle}>
+                                Conectar Conta Google
+                              </Button>
                             </div>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-500">Data de Conexão</p>
-                              <p>05/04/2025</p>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-500">Expiração do Token</p>
-                              <p>05/04/2026</p>
-                            </div>
-                          </div>
+                          )}
                         </div>
                         
                         <div>
@@ -220,16 +292,29 @@ const Dashboard = () => {
                                     <p className="text-sm text-gray-500">Acesso de leitura</p>
                                   </div>
                                 </div>
-                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                                  Ativo
-                                </span>
+                                {googleConnected ? (
+                                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                    Ativo
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                    Desconectado
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-gray-600 mb-2">
                                 Permite ao assistente ler seus emails e notificá-lo sobre mensagens importantes.
                               </p>
-                              <a href="#" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-                                Ver detalhes de permissões <ExternalLink size={14} />
-                              </a>
+                              {!googleConnected && (
+                                <Button variant="default" size="sm" onClick={handleConnectGoogle}>
+                                  Conectar
+                                </Button>
+                              )}
+                              {googleConnected && (
+                                <a href="#" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                                  Ver detalhes de permissões <ExternalLink size={14} />
+                                </a>
+                              )}
                             </div>
                             
                             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -243,16 +328,29 @@ const Dashboard = () => {
                                     <p className="text-sm text-gray-500">Acesso de leitura e escrita</p>
                                   </div>
                                 </div>
-                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                                  Ativo
-                                </span>
+                                {googleConnected ? (
+                                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                    Ativo
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                    Desconectado
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-gray-600 mb-2">
                                 Permite ao assistente criar eventos, verificar sua agenda e enviar lembretes.
                               </p>
-                              <a href="#" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-                                Ver detalhes de permissões <ExternalLink size={14} />
-                              </a>
+                              {!googleConnected && (
+                                <Button variant="default" size="sm" onClick={handleConnectGoogle}>
+                                  Conectar
+                                </Button>
+                              )}
+                              {googleConnected && (
+                                <a href="#" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                                  Ver detalhes de permissões <ExternalLink size={14} />
+                                </a>
+                              )}
                             </div>
                           </div>
                         </div>

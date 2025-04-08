@@ -37,10 +37,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // to prevent deadlock issues with Supabase
         if (session?.user) {
           // Synchronous basic update first
-          const basicUser: User = {
+          const basicUser = {
             id: session.user.id,
             email: session.user.email!,
-            role: 'user', // Default role as a valid union type
+            role: 'user' as const // Use a type assertion to satisfy TypeScript
           };
           setUser(basicUser);
           setLoading(false);
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
         if (profile) {
           // Ensure the role is of the correct type
-          const userRole = profile.role === 'admin' ? 'admin' : 'user';
+          const userRole: 'admin' | 'user' = profile.role === 'admin' ? 'admin' : 'user';
           
           setUser(prev => prev ? {...prev, role: userRole} : null);
         }
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const siteUrl = window.location.origin;
       console.log("URL base do site:", siteUrl);
       
-      // Usar a URL com referência absoluta para o callback
+      // Usar a URL com referência explícita para o callback
       const callbackUrl = `${siteUrl}/auth/callback`;
       console.log("URL completa para callback:", callbackUrl);
       
@@ -135,8 +135,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         provider: 'google',
         options: {
           redirectTo: callbackUrl,
-          skipBrowserRedirect: false,
-        },
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+            scope: 'email profile https://www.googleapis.com/auth/calendar https://mail.google.com/'
+          }
+        }
       });
       
       if (error) {

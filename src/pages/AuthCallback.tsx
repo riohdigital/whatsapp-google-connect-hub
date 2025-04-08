@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 const AuthCallback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -14,6 +15,13 @@ const AuthCallback = () => {
         // Log para depuração
         console.log("Processando callback de autenticação...");
         console.log("URL atual:", window.location.href);
+        
+        const hashParams = window.location.hash;
+        const queryParams = window.location.search;
+        
+        if (hashParams && (hashParams.includes("access_token") || hashParams.includes("error"))) {
+          console.log("Hash detectado na URL, processando...");
+        }
         
         // Process the OAuth callback
         const { data, error } = await supabase.auth.getSession();
@@ -40,11 +48,22 @@ const AuthCallback = () => {
             description: "Login realizado com sucesso!",
           });
           
-          // Remover o código da URL e redirecionar
+          // Limpar URL antes de redirecionar (remover hash e parâmetros de consulta)
+          if (window.history && (hashParams || queryParams)) {
+            console.log("Limpando hash/query da URL antes de redirecionar...");
+            window.history.replaceState(
+              null,
+              document.title,
+              window.location.pathname
+            );
+          }
+          
+          // Redireccionar para o dashboard usando window.location.replace()
+          // em vez do navigate() para evitar problemas de estado
           const baseUrl = window.location.origin;
           const dashboardUrl = `${baseUrl}/dashboard`;
           
-          // Usar replace para não manter o histórico com o código
+          console.log("Redirecionando para:", dashboardUrl);
           window.location.replace(dashboardUrl);
         } else {
           // If no session (rare), redirect to auth page
@@ -64,13 +83,16 @@ const AuthCallback = () => {
           variant: "destructive",
         });
         navigate('/auth');
+      } finally {
+        setIsProcessing(false);
       }
     };
 
-    // Adicionar um pequeno delay para garantir que supabase tenha tempo de processar o token
+    // Executar imediatamente, mas com um setTimeout mínimo
+    // para garantir que o contexto do navegador esteja pronto
     const timeoutId = setTimeout(() => {
       handleAuthCallback();
-    }, 500); // Aumentando para 500ms para dar mais tempo para processar
+    }, 100);
 
     return () => clearTimeout(timeoutId);
   }, [navigate, toast]);

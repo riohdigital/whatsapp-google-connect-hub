@@ -97,9 +97,6 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
       throw error;
     }
 
-    // Force a complete page refresh to ensure UI state is updated
-    window.location.href = '/dashboard';
-    
     return data;
   } catch (error) {
     console.error('Erro detalhado ao enviar código para o backend:', error);
@@ -161,3 +158,4 @@ export const getConfigTimeElapsed = (configTimestamp?: number): string => {
   if (hours === 1) return "1 hora";
   return `${hours} horas`;
 };
+

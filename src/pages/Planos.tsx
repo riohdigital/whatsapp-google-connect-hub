@@ -15,18 +15,19 @@ const Planos = () => {
   const handleSelectPlan = (planId: string) => {
     console.log(`Selecionando plano ${planId}`);
     
-    // If user is logged in, redirect to dashboard plans
-    if (user) {
-      navigate('/dashboard/planos');
+    // If user is not logged in, redirect to auth page
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Faça login para selecionar um plano",
+      });
+      navigate('/auth');
       return;
     }
     
-    // If user is not logged in, redirect to auth page
-    toast({
-      title: "Login necessário",
-      description: "Faça login para selecionar um plano",
-    });
-    navigate('/auth');
+    // Here you would implement your payment flow
+    // For now, we'll just redirect to dashboard with a simulated plan
+    navigate('/dashboard');
   };
   
   return (

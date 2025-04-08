@@ -6,59 +6,23 @@ import { Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const DashboardPlanos = () => {
-  const { user, userPlan } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   
   const handleSelectPlan = (planId: string) => {
-    setSelectedPlan(planId);
-    setIsConfirmOpen(true);
-  };
-  
-  const handleConfirmPlan = async () => {
-    if (!selectedPlan || !user) return;
+    console.log(`Selecionando plano ${planId}`);
     
-    setIsLoading(true);
+    // Here you would implement your payment flow
+    toast({
+      title: "Plano selecionado",
+      description: `Você selecionou o plano ${planId.toUpperCase()}. Em breve seu plano será atualizado.`,
+    });
     
-    try {
-      const { error } = await supabase
-        .from('user_plans')
-        .update({ 
-          plan_name: selectedPlan,
-          updated_at: new Date().toISOString(),
-          // Set expiration date to 30 days from now
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        })
-        .eq('user_id', user.id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Plano atualizado com sucesso",
-        description: `Seu plano foi atualizado para ${selectedPlan.toUpperCase()}.`,
-      });
-      
-      // Redirect back to dashboard
-      navigate('/dashboard');
-    } catch (error: any) {
-      console.error("Error updating plan:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao atualizar plano",
-        description: error.message || "Ocorreu um erro ao atualizar seu plano. Tente novamente.",
-      });
-    } finally {
-      setIsLoading(false);
-      setIsConfirmOpen(false);
-    }
+    // Redirect back to dashboard
+    navigate('/dashboard');
   };
   
   return (
@@ -68,16 +32,11 @@ const DashboardPlanos = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Atualizar Plano</h1>
           <p className="text-gray-600 mb-8">
             Escolha um novo plano para a sua conta
-            {userPlan && (
-              <span className="block mt-2 text-brand-blue font-medium">
-                Plano atual: {userPlan.planName.toUpperCase()}
-              </span>
-            )}
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Plano Básico */}
-            <Card className={`border-2 ${userPlan?.planName === 'basic' ? 'border-brand-blue' : 'border-gray-200 hover:border-brand-blue transition-all'}`}>
+            <Card className="border-2 border-gray-200 hover:border-brand-blue transition-all">
               <CardHeader>
                 <CardTitle className="text-xl text-center">Básico</CardTitle>
                 <div className="text-center">
@@ -108,19 +67,16 @@ const DashboardPlanos = () => {
               <CardFooter>
                 <Button 
                   className="w-full"
-                  variant={userPlan?.planName === 'basic' ? 'default' : 'outline'}
+                  variant="outline"
                   onClick={() => handleSelectPlan('basic')}
-                  disabled={userPlan?.planName === 'basic'}
                 >
-                  {userPlan?.planName === 'basic' ? 'Plano Atual' : 'Selecionar Plano'}
+                  Selecionar Plano
                 </Button>
               </CardFooter>
             </Card>
             
             {/* Plano Pro */}
-            <Card className={`border-2 ${userPlan?.planName === 'pro' 
-              ? 'border-brand-blue shadow-lg' 
-              : 'border-gray-200 shadow-lg hover:border-brand-blue transition-all'} relative`}>
+            <Card className="border-2 border-brand-blue shadow-lg relative">
               <div className="absolute top-0 left-0 right-0 bg-brand-blue text-white py-1 text-center text-sm font-medium">
                 MAIS POPULAR
               </div>
@@ -158,17 +114,15 @@ const DashboardPlanos = () => {
               <CardFooter>
                 <Button 
                   className="w-full"
-                  variant={userPlan?.planName === 'pro' ? 'secondary' : 'default'}
                   onClick={() => handleSelectPlan('pro')}
-                  disabled={userPlan?.planName === 'pro'}
                 >
-                  {userPlan?.planName === 'pro' ? 'Plano Atual' : 'Selecionar Plano'}
+                  Selecionar Plano
                 </Button>
               </CardFooter>
             </Card>
             
             {/* Plano Enterprise */}
-            <Card className={`border-2 ${userPlan?.planName === 'enterprise' ? 'border-brand-blue' : 'border-gray-200 hover:border-brand-blue transition-all'}`}>
+            <Card className="border-2 border-gray-200 hover:border-brand-blue transition-all">
               <CardHeader>
                 <CardTitle className="text-xl text-center">Enterprise</CardTitle>
                 <div className="text-center">
@@ -203,36 +157,16 @@ const DashboardPlanos = () => {
               <CardFooter>
                 <Button 
                   className="w-full"
-                  variant={userPlan?.planName === 'enterprise' ? 'default' : 'outline'}
+                  variant="outline"
                   onClick={() => handleSelectPlan('enterprise')}
-                  disabled={userPlan?.planName === 'enterprise'}
                 >
-                  {userPlan?.planName === 'enterprise' ? 'Plano Atual' : 'Selecionar Plano'}
+                  Selecionar Plano
                 </Button>
               </CardFooter>
             </Card>
           </div>
         </div>
       </section>
-      
-      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar alteração de plano</DialogTitle>
-            <DialogDescription>
-              Você está prestes a alterar seu plano para {selectedPlan?.toUpperCase()}. Esta alteração será aplicada imediatamente.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmOpen(false)} disabled={isLoading}>
-              Cancelar
-            </Button>
-            <Button onClick={handleConfirmPlan} disabled={isLoading}>
-              {isLoading ? "Processando..." : "Confirmar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </Layout>
   );
 };

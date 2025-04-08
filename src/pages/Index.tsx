@@ -3,11 +3,8 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Lock, Mail, Calendar, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
-  const { user } = useAuth();
-  
   return (
     <Layout>
       {/* Hero Section */}
@@ -23,19 +20,11 @@ const Index = () => {
                 pessoal possa ler seus emails e gerenciar seus compromissos.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                {user ? (
-                  <Button size="lg" asChild>
-                    <Link to="/dashboard" className="flex items-center gap-2">
-                      Dashboard <ArrowRight size={18} />
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button size="lg" asChild>
-                    <Link to="/conectar" className="flex items-center gap-2">
-                      Conectar agora <ArrowRight size={18} />
-                    </Link>
-                  </Button>
-                )}
+                <Button size="lg" asChild>
+                  <Link to="/conectar" className="flex items-center gap-2">
+                    Conectar agora <ArrowRight size={18} />
+                  </Link>
+                </Button>
                 <Button size="lg" variant="outline" asChild>
                   <Link to="/como-funciona">Saiba mais</Link>
                 </Button>
@@ -134,29 +123,11 @@ const Index = () => {
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Leva menos de um minuto para autorizar o acesso e começar a usar seu assistente pessoal com todas as funcionalidades.
           </p>
-          {user ? (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="default" className="bg-white text-gray-900 hover:bg-gray-100" asChild>
-                <Link to="/dashboard" className="flex items-center gap-2">
-                  Acessar Dashboard <ArrowRight size={18} />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-gray-800" asChild>
-                <Link to="/conectar">Configurar integração</Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="default" className="bg-white text-gray-900 hover:bg-gray-100" asChild>
-                <Link to="/conectar" className="flex items-center gap-2">
-                  Conectar minha conta Google <ArrowRight size={18} />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-gray-800" asChild>
-                <Link to="/auth">Entrar / Cadastrar</Link>
-              </Button>
-            </div>
-          )}
+          <Button size="lg" variant="default" className="bg-white text-gray-900 hover:bg-gray-100" asChild>
+            <Link to="/conectar" className="flex items-center gap-2">
+              Conectar minha conta Google <ArrowRight size={18} />
+            </Link>
+          </Button>
         </div>
       </section>
     </Layout>

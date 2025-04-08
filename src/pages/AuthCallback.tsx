@@ -15,13 +15,6 @@ const AuthCallback = () => {
         console.log("Processando callback de autenticação...");
         console.log("URL atual:", window.location.href);
         
-        // Verificar se há código ou token na URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const queryParams = new URLSearchParams(window.location.search);
-        
-        console.log("Hash params:", Object.fromEntries([...hashParams.entries()]));
-        console.log("Query params:", Object.fromEntries([...queryParams.entries()]));
-        
         // Process the OAuth callback
         const { data, error } = await supabase.auth.getSession();
         
@@ -47,19 +40,12 @@ const AuthCallback = () => {
             description: "Login realizado com sucesso!",
           });
           
-          // Limpar a URL e redirecionar para o dashboard sem parâmetros query
-          // Usando replaceState para modificar o histórico e window.location.replace para o redirecionamento
-          try {
-            // Primeiro tentar limpar o histórico
-            window.history.replaceState({}, document.title, "/dashboard");
-            
-            // Então redirecionar para o dashboard limpo
-            window.location.replace(`${window.location.origin}/dashboard`);
-          } catch (e) {
-            console.error("Erro ao manipular histórico:", e);
-            // Fallback: apenas redirecionar
-            window.location.replace(`${window.location.origin}/dashboard`);
-          }
+          // Remover o código da URL e redirecionar
+          const baseUrl = window.location.origin;
+          const dashboardUrl = `${baseUrl}/dashboard`;
+          
+          // Usar replace para não manter o histórico com o código
+          window.location.replace(dashboardUrl);
         } else {
           // If no session (rare), redirect to auth page
           console.error("Nenhuma sessão encontrada no callback");
@@ -81,10 +67,10 @@ const AuthCallback = () => {
       }
     };
 
-    // Pequeno atraso para garantir que todas as operações de autenticação terminem
+    // Adicionar um pequeno delay para garantir que supabase tenha tempo de processar o token
     const timeoutId = setTimeout(() => {
       handleAuthCallback();
-    }, 300); // Aumentando para 300ms para dar mais tempo para processar
+    }, 500); // Aumentando para 500ms para dar mais tempo para processar
 
     return () => clearTimeout(timeoutId);
   }, [navigate, toast]);

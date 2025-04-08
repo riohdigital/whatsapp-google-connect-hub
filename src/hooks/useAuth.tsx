@@ -33,10 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, session) => {
         console.log("Auth state changed:", event, session?.user?.email);
         
-        // Evitar execução de código async diretamente no callback
-        // para prevenir problemas de deadlock com Supabase
+        // Avoid async code directly in callback
+        // to prevent deadlock issues with Supabase
         if (session?.user) {
-          // Atualização síncrona básica primeiro
+          // Synchronous basic update first
           const basicUser: User = {
             id: session.user.id,
             email: session.user.email!,
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(basicUser);
           setLoading(false);
           
-          // Então buscar o perfil de forma assíncrona
+          // Then fetch profile asynchronously
           setTimeout(() => {
             fetchUserProfile(session.user.id);
           }, 0);
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
     
-    // Função auxiliar para buscar o perfil do usuário
+    // Helper function to fetch user profile
     const fetchUserProfile = async (userId: string) => {
       try {
         const { data: profile } = await supabase
@@ -73,16 +73,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("Erro ao buscar perfil do usuário:", error);
-        // Já temos o usuário básico definido, então não é necessário fazer nada aqui
+        // We already have the basic user set, so no need to do anything here
       }
     };
 
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Erro ao verificar sessão inicial:", error);
+        setLoading(false);
+        return;
+      }
+      
       if (session?.user) {
         console.log("Sessão inicial encontrada:", session.user.email);
-        // O básico será tratado pelo onAuthStateChange
-        // Aqui apenas garantimos que o loading não seja infinito
+        // The basic handling will be done by onAuthStateChange
+        // Just ensure loading isn't infinite
         if (loading) {
           setTimeout(() => {
             setLoading(false);
@@ -117,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Iniciando login com Google");
       
-      // Obter URL atual para callback - usando URL completa do site
+      // Obter URL atual para callback
       const siteUrl = window.location.origin;
       console.log("URL base do site:", siteUrl);
       

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 
 const ProfileForm = () => {
-  const { user, updateProfile, updatePassword } = useAuth();
+  const { user, updateProfile, updatePassword, googleConnected } = useAuth();
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [isProfileSaving, setIsProfileSaving] = useState(false);
@@ -18,6 +18,14 @@ const ProfileForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordSaving, setIsPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+
+  // Update form fields when user data changes
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+    }
+  }, [user]);
   
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +114,13 @@ const ProfileForm = () => {
                 <p className="text-xs text-gray-500">
                   O email não pode ser alterado.
                 </p>
+              </div>
+              
+              <div className="flex items-center gap-2 p-3 mt-4 bg-gray-50 border border-gray-200 rounded-md">
+                <div className={`w-3 h-3 rounded-full ${googleConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm font-medium">
+                  {googleConnected ? 'Conta Google conectada' : 'Conta Google não conectada'}
+                </span>
               </div>
               
               <Button type="submit" className="mt-4" disabled={isProfileSaving}>

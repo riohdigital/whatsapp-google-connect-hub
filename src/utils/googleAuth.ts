@@ -97,6 +97,11 @@ export const sendCodeToBackend = async (code: string, edgeFunctionUrl: string) =
       throw error;
     }
 
+    // Force refresh the page after successful connection to update the UI state
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+
     return data;
   } catch (error) {
     console.error('Erro detalhado ao enviar código para o backend:', error);

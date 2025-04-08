@@ -68,6 +68,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fetchGoogleConnection = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('digirioh_app_google_user_tokens')
+        .select('google_refresh_token')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 is "no rows returned" error, which just means no connection exists
+        console.error("Error fetching Google connection:", error);
+      }
+      
+      setGoogleConnected(!!data?.google_refresh_token);
+      console.log("Google connection status:", !!data?.google_refresh_token);
+    } catch (error) {
+      console.error("Error in fetchGoogleConnection:", error);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -81,16 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .select('role')
             .eq('id', session.user.id)
             .single();
-
-          // Check if the user has a Google OAuth connection
-          const { data: googleData } = await supabase
-            .from('digirioh_app_google_user_tokens')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .single();
             
-          setGoogleConnected(!!googleData?.google_refresh_token);
-          
           setUser({
             id: session.user.id,
             email: session.user.email!,
@@ -100,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Fetch additional user data in separate functions
           fetchUserPlan(session.user.id);
           fetchUserProfile(session.user.id);
+          fetchGoogleConnection(session.user.id);
         } else {
           setUser(null);
           setUserPlan(null);
@@ -250,6 +262,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .update({
           first_name: firstName,
           last_name: lastName,
+          updated_at: new Date(),
         })
         .eq('id', user.id);
 

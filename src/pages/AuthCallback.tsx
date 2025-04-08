@@ -19,8 +19,13 @@ const AuthCallback = () => {
         const hashParams = window.location.hash;
         const queryParams = window.location.search;
         
+        console.log("Hash params:", hashParams);
+        console.log("Query params:", queryParams);
+        
         if (hashParams && (hashParams.includes("access_token") || hashParams.includes("error"))) {
           console.log("Hash detectado na URL, processando...");
+        } else if (queryParams && (queryParams.includes("code") || queryParams.includes("error"))) {
+          console.log("Query params detectados na URL, processando código de autorização...");
         }
         
         // Process the OAuth callback
@@ -59,12 +64,12 @@ const AuthCallback = () => {
           }
           
           // Forçar uma pequena pausa antes de redirecionar para garantir que os eventos de autenticação sejam processados
+          console.log("Aguardando 1 segundo antes de redirecionar...");
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           console.log("Redirecionando para o dashboard após pausa deliberada");
           
-          // Redireccionar para o dashboard usando window.location.href
-          // em vez do navigate() ou replace() para garantir um refresh completo
+          // Usar o método mais confiável para redirecionamento
           window.location.href = "/dashboard";
         } else {
           // If no session (rare), redirect to auth page
@@ -93,7 +98,7 @@ const AuthCallback = () => {
     // para garantir que o contexto do navegador esteja pronto
     const timeoutId = setTimeout(() => {
       handleAuthCallback();
-    }, 300); // Aumentando para 300ms para dar mais tempo para o token ser processado
+    }, 500); // Aumentando para 500ms para dar mais tempo para o token ser processado
 
     return () => clearTimeout(timeoutId);
   }, [navigate, toast]);

@@ -105,13 +105,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("Iniciando login com Google");
       
-      // Obter URL atual para callback
+      // Obter URL atual para callback - usar a URL de produção em vez do localhost
       const siteUrl = window.location.origin;
       console.log("URL base do site:", siteUrl);
       
-      // Usar a URL com referência explícita para o callback
+      // Usar a URL exata do projeto no Lovable para garantir consistência com a configuração do Google OAuth
       const callbackUrl = `${siteUrl}/auth/callback`;
       console.log("URL completa para callback:", callbackUrl);
+      
+      // Adicionar logs adicionais para diagnóstico
+      console.log("Configuração do Google OAuth:");
+      console.log("- URL de redirecionamento:", callbackUrl);
+      console.log("- URL atual:", window.location.href);
       
       const { data, error } = await authService.signInWithGoogle(callbackUrl);
       
@@ -125,7 +130,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Redirecionamento explícito para garantir que vamos para a página certa
       if (data?.url) {
         console.log("Redirecionando para:", data.url);
-        window.location.href = data.url;
+        // Adicionar um pequeno atraso antes do redirecionamento para garantir que os logs sejam mostrados
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 100);
+      } else {
+        console.error("URL de redirecionamento não foi retornada");
+        throw new Error("URL de redirecionamento não foi retornada");
       }
     } catch (error: any) {
       console.error("Erro detalhado:", error);

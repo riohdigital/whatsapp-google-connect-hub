@@ -8,10 +8,7 @@ export const authService = {
 
   signInWithGoogle: async (callbackUrl: string) => {
     console.log("Iniciando login com Google");
-    
-    // Obter URL atual para callback
-    console.log("URL base do site:", callbackUrl);
-    console.log("URL completa para callback:", callbackUrl);
+    console.log("URL para callback:", callbackUrl);
     
     return await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -27,6 +24,8 @@ export const authService = {
   },
 
   signUp: async (email: string, password: string, callbackUrl: string) => {
+    console.log("URL para callback de SignUp:", callbackUrl);
+    
     return await supabase.auth.signUp({ 
       email, 
       password,

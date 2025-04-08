@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -70,21 +69,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchGoogleConnection = async (userId: string) => {
     try {
+      console.log("Checking Google connection for user:", userId);
       const { data, error } = await supabase
         .from('digirioh_app_google_user_tokens')
         .select('google_refresh_token')
         .eq('user_id', userId)
         .single();
       
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 is "no rows returned" error, which just means no connection exists
+      if (error) {
         console.error("Error fetching Google connection:", error);
+        if (error.code !== 'PGRST116') { // PGRST116 = no rows found
+          console.error("Unexpected error:", error);
+        }
+        setGoogleConnected(false);
+      } else {
+        const isConnected = !!data?.google_refresh_token;
+        console.log("Google connection status:", isConnected, data);
+        setGoogleConnected(isConnected);
       }
-      
-      setGoogleConnected(!!data?.google_refresh_token);
-      console.log("Google connection status:", !!data?.google_refresh_token);
     } catch (error) {
       console.error("Error in fetchGoogleConnection:", error);
+      setGoogleConnected(false);
+    }
+  };
+
+  // Refresh Google connection status (to be called after successful connection)
+  const refreshGoogleStatus = async () => {
+    if (user) {
+      await fetchGoogleConnection(user.id);
     }
   };
 
@@ -143,6 +155,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, [navigate, isDashboardPath]);
+
+  // Add an effect to check Google connection status whenever the route changes
+  // This ensures we refresh the status after a redirect from the connection flow
+  useEffect(() => {
+    if (user) {
+      fetchGoogleConnection(user.id);
+    }
+  }, [location.pathname, user]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -321,7 +341,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp, 
       signOut,
       updateProfile,
-      updatePassword
+      updatePassword,
+      refreshGoogleStatus
     }}>
       {children}
     </AuthContext.Provider>

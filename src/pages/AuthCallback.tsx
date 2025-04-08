@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const [isProcessing, setIsProcessing] = useState(true);
+  const { refreshGoogleStatus } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -25,10 +27,18 @@ const AuthCallback = () => {
         if (data.session) {
           // Show success message for Google connection
           if (provider === 'google') {
+            // Refresh the Google connection status
+            await refreshGoogleStatus();
+            
             toast({
               title: 'Conta Google conectada',
               description: 'Sua conta Google foi conectada com sucesso!',
             });
+            
+            // Force refresh the page after successful connection to update the UI state
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           }
           
           // Always navigate to dashboard after successful auth
@@ -51,7 +61,7 @@ const AuthCallback = () => {
     };
 
     handleAuthCallback();
-  }, [navigate, toast]);
+  }, [navigate, toast, refreshGoogleStatus]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

@@ -1,18 +1,18 @@
 
-export type User = {
+export interface User {
   id: string;
   email: string;
-  role: 'admin' | 'user';
+  role?: string;
   firstName?: string;
   lastName?: string;
-};
+}
 
-export type UserPlan = {
+export interface UserPlan {
   planName: string;
   expiresAt: Date | null;
-};
+}
 
-export type AuthContextType = {
+export interface AuthContextType {
   user: User | null;
   userPlan: UserPlan | null;
   loading: boolean;
@@ -24,4 +24,5 @@ export type AuthContextType = {
   signOut: () => Promise<void>;
   updateProfile: (firstName: string, lastName: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
-};
+  refreshGoogleStatus: () => Promise<void>;
+}

@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 const ProfileForm = () => {
-  const { user, updateProfile, updatePassword, googleConnected } = useAuth();
+  const { user, updateProfile, updatePassword, googleConnected, connectGoogle } = useAuth();
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [isProfileSaving, setIsProfileSaving] = useState(false);
@@ -64,6 +65,10 @@ const ProfileForm = () => {
     }
   };
   
+  const handleConnectGoogle = () => {
+    connectGoogle();
+  };
+  
   return (
     <Card>
       <CardHeader>
@@ -81,7 +86,7 @@ const ProfileForm = () => {
           
           <TabsContent value="profile">
             <form onSubmit={handleProfileSubmit}>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Nome</Label>
                   <Input
@@ -116,11 +121,35 @@ const ProfileForm = () => {
                 </p>
               </div>
               
-              <div className="flex items-center gap-2 p-3 mt-4 bg-gray-50 border border-gray-200 rounded-md">
-                <div className={`w-3 h-3 rounded-full ${googleConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm font-medium">
-                  {googleConnected ? 'Conta Google conectada' : 'Conta Google não conectada'}
-                </span>
+              <div className="mt-6 border border-gray-200 rounded-md p-4">
+                <h3 className="text-base font-medium mb-3">Integrações</h3>
+                
+                <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md">
+                  <div className="flex items-center gap-2">
+                    {googleConnected ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    )}
+                    <span className="font-medium">
+                      Conta Google
+                    </span>
+                  </div>
+                  <div>
+                    {googleConnected ? (
+                      <span className="text-sm text-green-600 font-medium">Conectada</span>
+                    ) : (
+                      <Button 
+                        type="button" 
+                        onClick={handleConnectGoogle}
+                        variant="outline" 
+                        size="sm"
+                      >
+                        Conectar
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
               
               <Button type="submit" className="mt-4" disabled={isProfileSaving}>

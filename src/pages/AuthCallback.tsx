@@ -47,8 +47,19 @@ const AuthCallback = () => {
             description: "Login realizado com sucesso!",
           });
           
-          // Técnica de redirecionamento mais forte - substitui a página atual
-          window.location.replace(`${window.location.origin}/dashboard`);
+          // Limpar a URL e redirecionar para o dashboard sem parâmetros query
+          // Usando replaceState para modificar o histórico e window.location.replace para o redirecionamento
+          try {
+            // Primeiro tentar limpar o histórico
+            window.history.replaceState({}, document.title, "/dashboard");
+            
+            // Então redirecionar para o dashboard limpo
+            window.location.replace(`${window.location.origin}/dashboard`);
+          } catch (e) {
+            console.error("Erro ao manipular histórico:", e);
+            // Fallback: apenas redirecionar
+            window.location.replace(`${window.location.origin}/dashboard`);
+          }
         } else {
           // If no session (rare), redirect to auth page
           console.error("Nenhuma sessão encontrada no callback");
@@ -73,7 +84,7 @@ const AuthCallback = () => {
     // Pequeno atraso para garantir que todas as operações de autenticação terminem
     const timeoutId = setTimeout(() => {
       handleAuthCallback();
-    }, 100);
+    }, 300); // Aumentando para 300ms para dar mais tempo para processar
 
     return () => clearTimeout(timeoutId);
   }, [navigate, toast]);

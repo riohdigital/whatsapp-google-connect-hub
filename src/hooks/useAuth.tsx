@@ -30,43 +30,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log("Auth state changed:", event, session?.user?.email);
+        
+        // Evitar execução de código async diretamente no callback
+        // para prevenir problemas de deadlock com Supabase
         if (session?.user) {
-          // Get user profile with role
-          try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', session.user.id)
-              .single();
-
-            setUser({
-              id: session.user.id,
-              email: session.user.email!,
-              role: profile?.role || 'user',
-            });
-          } catch (error) {
-            console.error("Erro ao buscar perfil do usuário:", error);
-            // Mesmo sem perfil, configurar usuário básico
-            setUser({
-              id: session.user.id,
-              email: session.user.email!,
-              role: 'user',
-            });
-          }
+          // Atualização síncrona básica primeiro
+          const basicUser = {
+            id: session.user.id,
+            email: session.user.email!,
+            role: 'user', // Default role
+          };
+          setUser(basicUser);
+          setLoading(false);
+          
+          // Então buscar o perfil de forma assíncrona
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
+    
+    // Função auxiliar para buscar o perfil do usuário
+    const fetchUserProfile = async (userId: string) => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .single();
+          
+        if (profile) {
+          setUser(prev => prev ? {...prev, role: profile.role || 'user'} : null);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar perfil do usuário:", error);
+        // Já temos o usuário básico definido, então não é necessário fazer nada aqui
+      }
+    };
 
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         console.log("Sessão inicial encontrada:", session.user.email);
-        // This will be handled by onAuthStateChange
+        // O básico será tratado pelo onAuthStateChange
+        // Aqui apenas garantimos que o loading não seja infinito
+        if (loading) {
+          setTimeout(() => {
+            setLoading(false);
+          }, 1000);
+        }
       } else {
         console.log("Nenhuma sessão inicial encontrada");
         setLoading(false);

@@ -81,6 +81,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_last_location: {
         Row: {
           created_at: string
@@ -129,6 +153,33 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           user_jid?: string | null
+        }
+        Relationships: []
+      }
+      user_plans: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
